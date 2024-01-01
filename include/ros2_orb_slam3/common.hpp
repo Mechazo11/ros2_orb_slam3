@@ -16,8 +16,8 @@
 //* ROS2 includes
 //* std_msgs in ROS 2 https://docs.ros2.org/foxy/api/std_msgs/index-msg.html
 #include "rclcpp/rclcpp.hpp"
-#include "matimg_custom_msg_interface/msg/mat_img.hpp"
-#include "matimg_custom_msg_interface/msg/eigen_msg.hpp" 
+
+// #include "your_custom_msg_interface/msg/custom_msg_field.hpp" // Example of adding in a custom message
 #include <std_msgs/msg/header.hpp>
 #include <std_msgs/msg/float32_multi_array.hpp>
 #include <std_msgs/msg/multi_array_layout.hpp>
@@ -49,14 +49,13 @@ using std::placeholders::_1; //* TODO why this is suggested in official tutorial
 #define pass (void)0 // Python's equivalent of "pass" i.e. no operation
 
 
-
 //* Node specific definitions
 class MonocularMode : public rclcpp::Node
 {   
     //* This slam node inherits from both rclcpp and ORB_SLAM3::System classes
     //* public keyword needs to come before the class constructor and anything else
     public:
-    
+    std::string experimentConfig = ""; // String to receive settings sent by the python driver
         
     //* Class constructor
     MonocularMode(); // Constructor 
@@ -72,10 +71,10 @@ class MonocularMode : public rclcpp::Node
         std::string nodeName = ""; // Name of this node
         std::string vocFilePath = ""; // Path to ORB vocabulary provided by DBoW2 package
         std::string settingsFilePath = ""; // Path to settings file provided by ORB_SLAM3 package
-        // bool bSettingsFromPython = false; // Flag set once when experiment setting from python node is received
+        bool bSettingsFromPython = false; // Flag set once when experiment setting from python node is received
         
-        //std::string subexperimentconfigName = ""; // Subscription topic name
-        //std::string pubconfigackName = ""; // Publisher topic name
+        std::string subexperimentconfigName = ""; // Subscription topic name
+        std::string pubconfigackName = ""; // Publisher topic name
         std::string subImgMsgName = ""; // Topic to subscribe to receive RGB images from a python node
 
         //* Definitions of publisher and subscribers
@@ -90,8 +89,8 @@ class MonocularMode : public rclcpp::Node
         bool enableOpenCVWindow = false; // Shows OpenCV window output
 
         //* ROS callbacks
-        // void experimentSetting_callback(const std_msgs::msg::String& msg); // Callback to process settings sent over by Python node
-        void Img_callback(const matimg_custom_msg_interface::msg::MatImg& msg); // Callback to process RGB image and semantic matrix sent by Python node
+        void experimentSetting_callback(const std_msgs::msg::String& msg); // Callback to process settings sent over by Python node
+        void Img_callback(const sensor_msgs::msg::Image& msg); // Callback to process RGB image and semantic matrix sent by Python node
         
         //* Helper functions
         // ORB_SLAM3::eigenMatXf convertToEigenMat(const std_msgs::msg::Float32MultiArray& msg); // Helper method, converts semantic matrix eigenMatXf, a Eigen 4x4 float matrix

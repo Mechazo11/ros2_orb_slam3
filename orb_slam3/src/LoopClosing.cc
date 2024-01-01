@@ -982,8 +982,8 @@ void LoopClosing::CorrectLoop()
         unique_lock<mutex> lock(mMutexGBA);
         mbStopGBA = true;
 
-        mnFullBAIdx++;
-
+        mnFullBAIdx++; //* 01/01/2024 this line throws error use of an operand of type ‘bool’ in ‘operator++’ is forbidden in C++17
+        
         if(mpThreadGBA)
         {
             mpThreadGBA->detach();

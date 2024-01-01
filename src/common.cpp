@@ -8,7 +8,7 @@ NOTES
 
 */
 
-#include "ros2_orb_slam3/robot_slam.hpp"
+#include "ros2_orb_slam3/common.hpp"
 
 //* Constructor
 MonocularMode::MonocularMode() :Node("mono-orb-slam3")
@@ -26,7 +26,9 @@ MonocularMode::MonocularMode() :Node("mono-orb-slam3")
     this->declare_parameter("node_name_arg", "not_given"); // Name of this agent 
     this->declare_parameter("voc_file_arg", "file_not_set"); // Needs to be overriden with appropriate name  
     this->declare_parameter("settings_file_path_arg", "file_path_not_set"); // path to settings file  
-    this->declare_parameter("settings_file_name_arg", "file_not_set"); // Which settings file? i.e. EuRoC, LSU-iCORE mono etc  
+    
+    
+    //this->declare_parameter("settings_file_name_arg", "file_not_set"); // Depricited, sent by the python node  
 
 
     //* Watchdog, populate default values
@@ -44,7 +46,7 @@ MonocularMode::MonocularMode() :Node("mono-orb-slam3")
     rclcpp::Parameter param3 = this->get_parameter("settings_file_path_arg");
     settingsFilePath = param3.as_string();
 
-    rclcpp::Parameter param4 = this->get_parameter("settings_file_name_arg");
+    // rclcpp::Parameter param4 = this->get_parameter("settings_file_name_arg");
     
   
     //* HARDCODED, set paths
@@ -55,33 +57,27 @@ MonocularMode::MonocularMode() :Node("mono-orb-slam3")
         settingsFilePath = homeDir + "/" + packagePath + "orb_slam3/config/Monocular/";
     }
 
-    std::cout<<"vocFilePath: "<<vocFilePath<<std::endl;
-    std::cout<<"settingsFilePath: "<<settingsFilePath<<std::endl;
+    // std::cout<<"vocFilePath: "<<vocFilePath<<std::endl;
+    // std::cout<<"settingsFilePath: "<<settingsFilePath<<std::endl;
     
     
-    //* Build the full path
-    settingsFilePath = settingsFilePath.append(param4.as_string());
-    settingsFilePath = settingsFilePath.append(".yaml"); // ros2_ws/src/orb_slam3_ros2/orb_slam3/config/Monocular/TUM2.yaml
-
     //* DEBUG print
-    RCLCPP_INFO(this->get_logger(), "nodeName %s", agentName.c_str());
+    RCLCPP_INFO(this->get_logger(), "nodeName %s", nodeName.c_str());
     RCLCPP_INFO(this->get_logger(), "voc_file %s", vocFilePath.c_str());
-    RCLCPP_INFO(this->get_logger(), "settings_file_path %s", settingsFilePath.c_str());
+    // RCLCPP_INFO(this->get_logger(), "settings_file_path %s", settingsFilePath.c_str());
     
-
-    subexperimentconfigName = "/" + agentName + "/experiment_settings"; // subscription topic name
-    pubconfigackName = "/" + agentName + "/exp_settings_ack"; // publish topic name
-    
-    subMatimgName = "/" + agentName + "/matimg_msg"; // subscription topic name
+    subexperimentconfigName = "/mono_py_driver/experiment_settings"; // topic that sends out some configuration parameters to the cpp ndoe
+    pubconfigackName = "/mono_py_driver/exp_settings_ack"; // send an acknowledgement to the python node
+    subImgMsgName = "/mono_py_driver/img_msg"; // topic to receive RGB image messages
 
     //* subscribe to python node to receive settings
-    expConfig_subscription_ = this->create_subscription<std_msgs::msg::String>(subexperimentconfigName, 1, std::bind(&RobotMonocularSLAM::experimentSetting_callback, this, _1));
+    expConfig_subscription_ = this->create_subscription<std_msgs::msg::String>(subexperimentconfigName, 1, std::bind(&MonocularMode::experimentSetting_callback, this, _1));
 
     //* publisher to send out acknowledgement
     configAck_publisher_ = this->create_publisher<std_msgs::msg::String>(pubconfigackName, 10);
 
     //* subscrbite to the image messages coming from the Python driver node
-    subMatimg_subscription_= this->create_subscription<matimg_custom_msg_interface::msg::MatImg>(subMatimgName, 1, std::bind(&RobotMonocularSLAM::matImg_callback, this, _1));
+    subImgMsg_subscription_= this->create_subscription<sensor_msgs::msg::Image>(subImgMsgName, 1, std::bind(&MonocularMode::Img_callback, this, _1));
 
     
     RCLCPP_INFO(this->get_logger(), "Waiting to finish handshake ......");
@@ -93,34 +89,39 @@ MonocularMode::~MonocularMode()
 {   
     
     // Stop all threads
-    // Saving trajectory and any further clean are done here
+    // Call method to write the trajectory file
+    // Release resources and cleanly shutdown
     pAgent->Shutdown();
 
-    // // Save camera trajectory
-    // m_SLAM->SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
 }
 
 //* Method to bind an initialized VSLAM framework to this node
 void MonocularMode::initializeVSLAM(std::string& configString){
     
-    // TODO take name of the 
-    
-    // Error if the paths to vocabular and settings files are still not set
+    // Watchdog, if the paths to vocabular and settings files are still not set
     if (vocFilePath == "file_not_set" || settingsFilePath == "file_not_set")
     {
         RCLCPP_ERROR(get_logger(), "Please provide valid voc_file and settings_file paths");       
         rclcpp::shutdown();
     } 
     
-    // TODO populate these from 
+    //* Build the full path to the .yaml settings file
     
-    sensorType = ORB_SLAM3::System::MONOCULAR; // TODO make part of launch file
+    // TODO extract the name of the setting_file sent by the Python node here
+    
+    // settingsFilePath = settingsFilePath.append(param4.as_string());
+    // settingsFilePath = settingsFilePath.append(".yaml"); // ros2_ws/src/orb_slam3_ros2/orb_slam3/config/Monocular/TUM2.yaml
+
+    RCLCPP_INFO(this->get_logger(), "settings_file_path %s", settingsFilePath.c_str());
+
+    // NOTE if you plan on passing other configuration parameters to ORB SLAM3 Systems class, do it here
+    // Read a "config.yaml" file and populate the following settings
+    sensorType = ORB_SLAM3::System::MONOCULAR; 
     enablePangolinWindow = true; // Shows Pangolin window output
     enableOpenCVWindow = true; // Shows OpenCV window output
     
     // pAgent = new ORB_SLAM3::System(vocFilePath, settingsFilePath, sensorType, experimentConfig, agentName, enableOpenCVWindow, enablePangolinWindow);
-    
-    std::cout << "MonocularMode node initialized" << std::endl; // TODO needs a better message
+    // std::cout << "MonocularMode node initialized" << std::endl; // TODO needs a better message
 }
 
 //* Callback which accepts experiment parameters from the Python node
@@ -146,7 +147,7 @@ void MonocularMode::experimentSetting_callback(const std_msgs::msg::String& msg)
 }
 
 //* Callback to process image and semantic matrix from python node
-void MonocularMode::Img_callback(const matimg_custom_msg_interface::msg::MatImg& msg)
+void MonocularMode::Img_callback(const sensor_msgs::msg::Image& msg)
 {
     // std::cout<<"in matImg_callback()"<<std::endl;
     
@@ -157,7 +158,7 @@ void MonocularMode::Img_callback(const matimg_custom_msg_interface::msg::MatImg&
     try
     {
         //cv::Mat im =  cv_bridge::toCvShare(msg.img, msg)->image;
-        cv_ptr = cv_bridge::toCvCopy(msg.img); // Local scope
+        cv_ptr = cv_bridge::toCvCopy(msg); // Local scope
         
         // DEBUGGING, Show image
         // Update GUI Window
@@ -170,8 +171,12 @@ void MonocularMode::Img_callback(const matimg_custom_msg_interface::msg::MatImg&
         return;
     }
     
+    // TODO figure out timestep from the image`s name?
+
     //* Convert timestamp into C++ double
     // double timestamp = msg.timestamp;
+    double timestamp = 1.0; 
+
 
     //* TODO
     //Sophus::SE3f Tcw = pAgent->TrackMonocular(cv_ptr->image, timestamp); //* Entry point to ORB_SLAM3 pipeline (overloaded TrackMonocular)
