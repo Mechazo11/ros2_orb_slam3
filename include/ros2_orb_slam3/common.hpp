@@ -12,6 +12,8 @@
 #include <thread> // class to represent individual threads of execution.
 #include <mutex> // A mutex is a lockable object that is designed to signal when critical sections of code need exclusive access, preventing other threads with the same protection from executing concurrently and access the same memory locations.
 #include <cstdlib> // to find home directory
+
+#include <cstring>
 #include <sstream> // String stream processing functionalities
 
 //* ROS2 includes
@@ -20,9 +22,7 @@
 
 // #include "your_custom_msg_interface/msg/custom_msg_field.hpp" // Example of adding in a custom message
 #include <std_msgs/msg/header.hpp>
-#include <std_msgs/msg/float32_multi_array.hpp>
-#include <std_msgs/msg/multi_array_layout.hpp>
-#include <std_msgs/msg/multi_array_dimension.hpp>
+#include "std_msgs/msg/float64.hpp"
 #include <std_msgs/msg/string.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include "sensor_msgs/msg/image.hpp"
@@ -57,7 +57,8 @@ class MonocularMode : public rclcpp::Node
     //* public keyword needs to come before the class constructor and anything else
     public:
     std::string experimentConfig = ""; // String to receive settings sent by the python driver
-    std::string timeStep = ""; // Updated by the python node
+    double timeStep; // Timestep data received from the python node
+    std::string receivedConfig = "";
 
     //* Class constructor
     MonocularMode(); // Constructor 
@@ -68,7 +69,7 @@ class MonocularMode : public rclcpp::Node
         
         // Class internal variables
         std::string homeDir = "";
-        std::string packagePath = "ros2_test/src/ros2_orb_slam3/"; // TODO find a programmatic approach
+        std::string packagePath = "ros2_test/src/ros2_orb_slam3/"; //! Change to match path to your workspace
         std::string OPENCV_WINDOW = ""; // Set during initialization
         std::string nodeName = ""; // Name of this node
         std::string vocFilePath = ""; // Path to ORB vocabulary provided by DBoW2 package
@@ -84,7 +85,7 @@ class MonocularMode : public rclcpp::Node
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr expConfig_subscription_;
         rclcpp::Publisher<std_msgs::msg::String>::SharedPtr configAck_publisher_;
         rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subImgMsg_subscription_;
-        rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subTimestepMsg_subscription_;
+        rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr subTimestepMsg_subscription_;
 
         //* ORB_SLAM3 related variables
         ORB_SLAM3::System* pAgent; // pointer to a ORB SLAM3 object
@@ -94,7 +95,7 @@ class MonocularMode : public rclcpp::Node
 
         //* ROS callbacks
         void experimentSetting_callback(const std_msgs::msg::String& msg); // Callback to process settings sent over by Python node
-        void Timestep_callback(const std_msgs::msg::String& time_msg); // Callback to process the timestep for this image
+        void Timestep_callback(const std_msgs::msg::Float64& time_msg); // Callback to process the timestep for this image
         void Img_callback(const sensor_msgs::msg::Image& msg); // Callback to process RGB image and semantic matrix sent by Python node
         
         //* Helper functions

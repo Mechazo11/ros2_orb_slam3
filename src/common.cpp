@@ -1,13 +1,16 @@
 /*
 
-TODO write something here i.e purpose of this node and what it does
-* pass
+A bare-bones example node demonstrating the use of the Monocular mode in ORB-SLAM3
 
-NOTES
-* pass
+Author: Azmyin Md. Kamal
+Date: 01/01/24
+
+REQUIREMENTS
+* Make sure to set path to your workspace in common.hpp file
 
 */
 
+//* Includes
 #include "ros2_orb_slam3/common.hpp"
 
 //* Constructor
@@ -27,9 +30,6 @@ MonocularMode::MonocularMode() :Node("mono_node_cpp")
     this->declare_parameter("voc_file_arg", "file_not_set"); // Needs to be overriden with appropriate name  
     this->declare_parameter("settings_file_path_arg", "file_path_not_set"); // path to settings file  
     
-    //this->declare_parameter("settings_file_name_arg", "file_not_set"); // Depricited, sent by the python node  
-
-
     //* Watchdog, populate default values
     nodeName = "not_set";
     vocFilePath = "file_not_set";
@@ -80,7 +80,7 @@ MonocularMode::MonocularMode() :Node("mono_node_cpp")
     subImgMsg_subscription_= this->create_subscription<sensor_msgs::msg::Image>(subImgMsgName, 1, std::bind(&MonocularMode::Img_callback, this, _1));
 
     //* subscribe to receive the timestep
-    subTimestepMsg_subscription_= this->create_subscription<std_msgs::msg::String>(subTimestepMsgName, 1, std::bind(&MonocularMode::Timestep_callback, this, _1));
+    subTimestepMsg_subscription_= this->create_subscription<std_msgs::msg::Float64>(subTimestepMsgName, 1, std::bind(&MonocularMode::Timestep_callback, this, _1));
 
     
     RCLCPP_INFO(this->get_logger(), "Waiting to finish handshake ......");
@@ -102,13 +102,13 @@ MonocularMode::~MonocularMode()
 //* Callback which accepts experiment parameters from the Python node
 void MonocularMode::experimentSetting_callback(const std_msgs::msg::String& msg){
     
-    std::cout<<"experimentSetting_callback"<<std::endl;
+    // std::cout<<"experimentSetting_callback"<<std::endl;
     bSettingsFromPython = true;
     experimentConfig = msg.data.c_str();
+    // receivedConfig = experimentConfig; // Redundant
     
-    //std::cout<<"Received configuration: "<<experimentConfig<<std::endl;
-    RCLCPP_INFO(this->get_logger(), "experimentConfig received: %s", experimentConfig.c_str());
-    
+    RCLCPP_INFO(this->get_logger(), "Configuration YAML file name: %s", this->receivedConfig.c_str());
+
     //* Publish acknowledgement
     auto message = std_msgs::msg::String();
     message.data = "ACK";
@@ -117,7 +117,7 @@ void MonocularMode::experimentSetting_callback(const std_msgs::msg::String& msg)
     configAck_publisher_->publish(message);
 
     //* Wait to complete VSLAM initialization
-    // initializeVSLAM(experimentConfig);
+    initializeVSLAM(experimentConfig);
 
 }
 
@@ -131,45 +131,32 @@ void MonocularMode::initializeVSLAM(std::string& configString){
         rclcpp::shutdown();
     } 
     
-    //* Extract the .yaml file`s name and build its full path.
-    std::istringstream iss(experimentConfig);
-    std::string firstPart;
-
-    std::getline(iss, firstPart, '/');
+    //* Build .yaml`s file path
     
-    RCLCPP_INFO(this->get_logger(), "First part %s", firstPart.c_str());
+    settingsFilePath = settingsFilePath.append(configString);
+    settingsFilePath = settingsFilePath.append(".yaml"); // Example ros2_ws/src/orb_slam3_ros2/orb_slam3/config/Monocular/TUM2.yaml
 
-    //! RESUME FROM HERE
-
-    // settingsFilePath = settingsFilePath.append(param4.as_string());
-    // settingsFilePath = settingsFilePath.append(".yaml"); // ros2_ws/src/orb_slam3_ros2/orb_slam3/config/Monocular/TUM2.yaml
-
-    RCLCPP_INFO(this->get_logger(), "settings_file_path %s", settingsFilePath.c_str());
-
+    RCLCPP_INFO(this->get_logger(), "Path to settings file: %s", settingsFilePath.c_str());
+    
     // NOTE if you plan on passing other configuration parameters to ORB SLAM3 Systems class, do it here
     // NOTE you may also use a .yaml file here to set these values
     sensorType = ORB_SLAM3::System::MONOCULAR; 
     enablePangolinWindow = true; // Shows Pangolin window output
     enableOpenCVWindow = true; // Shows OpenCV window output
     
-    // pAgent = new ORB_SLAM3::System(vocFilePath, settingsFilePath, sensorType, experimentConfig, agentName, enableOpenCVWindow, enablePangolinWindow);
-    // std::cout << "MonocularMode node initialized" << std::endl; // TODO needs a better message
+    pAgent = new ORB_SLAM3::System(vocFilePath, settingsFilePath, sensorType, enablePangolinWindow);
+    std::cout << "MonocularMode node initialized" << std::endl; // TODO needs a better message
 }
-
 
 //* Callback that processes timestep sent over ROS
-void MonocularMode::Timestep_callback(const std_msgs::msg::String& time_msg){
-    this->timeStep = "";
-    this->timeStep = time_msg.data.c_str();
-    // std::cout<<"Timestep: "<<this->timeStep<<std::endl;
+void MonocularMode::Timestep_callback(const std_msgs::msg::Float64& time_msg){
+    // timeStep = 0; // Initialize
+    timeStep = time_msg.data;
 }
-
 
 //* Callback to process image message and run SLAM node
 void MonocularMode::Img_callback(const sensor_msgs::msg::Image& msg)
 {
-    // std::cout<<"in matImg_callback()"<<std::endl;
-    
     // Initialize
     cv_bridge::CvImagePtr cv_ptr; //* Does not create a copy, memory efficient
     
@@ -181,8 +168,8 @@ void MonocularMode::Img_callback(const sensor_msgs::msg::Image& msg)
         
         // DEBUGGING, Show image
         // Update GUI Window
-        cv::imshow("test_window", cv_ptr->image);
-        cv::waitKey(3);
+        // cv::imshow("test_window", cv_ptr->image);
+        // cv::waitKey(3);
     }
     catch (cv_bridge::Exception& e)
     {
@@ -190,12 +177,13 @@ void MonocularMode::Img_callback(const sensor_msgs::msg::Image& msg)
         return;
     }
     
-    //* Convert timestep in String to double
-    double timestep = std::stod(this->timeStep); 
-    // std::cout<<std::fixed<<"Timestep: "<<timestep<<std::endl; // Debug
-   
-    //* TODO
-    //Sophus::SE3f Tcw = pAgent->TrackMonocular(cv_ptr->image, timestep); //* Entry point to ORB_SLAM3 pipeline (overloaded TrackMonocular)
+    // std::cout<<std::fixed<<"Timestep: "<<timeStep<<std::endl; // Debug
+    
+    //* Perform all ORB-SLAM3 operations in Monocular mode
+    //! Pose with respect to the camera coordinate frame not the world coordinate frame
+    Sophus::SE3f Tcw = pAgent->TrackMonocular(cv_ptr->image, timeStep); 
+    
+    //* An example of what can be done after the pose w.r.t camera coordinate frame is computed by ORB SLAM3
     //Sophus::SE3f Twc = Tcw.inverse(); //* Pose with respect to global image coordinate, reserved for future use
 
 }

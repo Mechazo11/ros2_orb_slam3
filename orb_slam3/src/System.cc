@@ -379,6 +379,11 @@ Sophus::SE3f System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const
     return Tcw;
 }
 
+
+//* Main method for monocular SLAM mode
+// Proccess the given monocular frame and optionally imu data
+// Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
+// Returns the camera pose (empty if tracking fails).
 Sophus::SE3f System::TrackMonocular(const cv::Mat &im, const double &timestamp, const vector<IMU::Point>& vImuMeas, string filename)
 {
 
@@ -400,6 +405,8 @@ Sophus::SE3f System::TrackMonocular(const cv::Mat &im, const double &timestamp, 
         cv::resize(im,resizedIm,settings_->newImSize());
         imToFeed = resizedIm;
     }
+
+    
 
     // Check mode change
     {

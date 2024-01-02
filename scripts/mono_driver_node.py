@@ -10,6 +10,7 @@ Date: 01/01/2024
 Requirements
 * Dataset must be configured in EuRoC MAV format
 * Paths to dataset must be set before bulding (or running) this node
+* Make sure to set path to your workspace in common.hpp
 
 Command line arguments
 -- settings_name: EuRoC, TUM2, KITTI etc; the name of the .yaml file containing camera intrinsics and other configurations
@@ -47,9 +48,7 @@ from rclpy.parameter import Parameter
 
 # Import ROS2 message templates
 from sensor_msgs.msg import Image # http://wiki.ros.org/sensor_msgs
-from std_msgs.msg import String # ROS2 string message template
-from std_msgs.msg import Float32MultiArray
-from std_msgs.msg import MultiArrayDimension # http://docs.ros.org/en/melodic/api/std_msgs/html/msg/MultiArrayLayout.html
+from std_msgs.msg import String, Float64 # ROS2 string message template
 from cv_bridge import CvBridge, CvBridgeError # Library to convert image messages to numpy array
 
 #* Class definition
@@ -72,14 +71,11 @@ class MonoDriver(Node):
         print()
 
         # Global path definitions
-        self.home_dir = str(Path.home()) + "/ros2_test/src/ros2_orb_slam3"
-        self.parent_dir = "TEST_DATASET" # Change name of parent folder as you see fit
+        self.home_dir = str(Path.home()) + "/ros2_test/src/ros2_orb_slam3" #! Change this to match path to your workspace
+        self.parent_dir = "TEST_DATASET" #! Change or provide path to the parent directory where data for all image sequences are stored
         self.image_sequence_dir = self.home_dir + "/" + self.parent_dir + "/" + self.image_seq # Full path to the image sequence folder
 
         print(f"self.image_sequence_dir: {self.image_sequence_dir}\n")
-
-        # package_directory = ament_index_python.packages.get_package_share_directory("ros2_orb_slam3")
-        # print(f"package_directory: {package_directory}")
 
         # Global variables
         self.node_name = "mono_py_driver"
@@ -107,7 +103,8 @@ class MonoDriver(Node):
         self.publish_exp_config_ = self.create_publisher(String, self.pub_exp_config_name, 1) # Publish configs to the ORB-SLAM3 C++ node
 
         #* Build the configuration string to be sent out
-        self.exp_config_msg = self.settings_name + "/" + self.image_seq # Example EuRoC/sample_euroc_MH05
+        #self.exp_config_msg = self.settings_name + "/" + self.image_seq # Example EuRoC/sample_euroc_MH05
+        self.exp_config_msg = self.settings_name # Example EuRoC
         print(f"Configuration to be sent: {self.exp_config_msg}")
 
 
@@ -120,7 +117,7 @@ class MonoDriver(Node):
         # Publisher to send RGB image
         self.publish_img_msg_ = self.create_publisher(Image, self.pub_img_to_agent_name, 1)
         
-        self.publish_timestep_msg_ = self.create_publisher(String, self.pub_timestep_to_agent_name, 1)
+        self.publish_timestep_msg_ = self.create_publisher(Float64, self.pub_timestep_to_agent_name, 1)
 
 
         # Initialize work variables for main logic
@@ -204,8 +201,8 @@ class MonoDriver(Node):
 
         # Based on the tutorials
         img_msg = self.br.cv2_to_imgmsg(cv2.imread(img_look_up_path), encoding="passthrough")
-        timestep_msg = String()
-        timestep_msg.data = str(timestep)
+        timestep_msg = Float64()
+        timestep_msg.data = timestep
 
         # Publish RGB image and timestep, must be in the order shown below. I know not very optimum, you can use a custom message interface to send both
         try:
