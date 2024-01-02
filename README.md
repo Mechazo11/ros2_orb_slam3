@@ -4,7 +4,7 @@ A native ROS2 package for ORB SLAM3 V1.0. Focus is on native integration with RO
 
 ## 0. Preamble
 * This package builds [ORB-SLAM3](https://github.com/UZ-SLAMLab/ORB_SLAM3) V1.0 as a shared internal library. Comes included with a number of Thirdparty libraries [DBoW2, g2o, Sophus]
-* g2o used is a 
+* g2o used is an older version and is incompatible with the recent version.
 * This package differs from other ROS1 wrappers, thien94`s ROS 1 port and ROS 2 wrappers in GitHub by supprting/adopting the following
   * A separate python node to send data to the ORB-SLAM3 cpp node. This is a purely design choice.
   * At least C++17 and Cmake>=3.8
@@ -26,7 +26,7 @@ sudo apt install libeigen3-dev
 ### Pangolin and configuring dynamic library path
 We install Pangolin system wide and configure the dynamic library path so the necessary .so from Pangolin can be found by ros2 package during run time. More info here https://robotics.stackexchange.com/questions/105973/ros2-port-of-orb-slam3-can-copy-libdow2-so-and-libg2o-so-using-cmake-but-gettin
 
-Install Pangolin
+#### Install Pangolin
 
 ```
 cd ~/Documents
@@ -38,18 +38,17 @@ cmake -B build
 cmake --build build -j4
 sudo cmake --install build
 ```
-Check if ```/usr/lib/local``` is in the LIBRARY PATH
+#### Configure dynamic library
 
+Check if ```/usr/lib/local``` is in the LIBRARY PATH
 ```
 echo $LD_LIBRARY_PATH
 ```
-
 If not, then perform the following 
 ```
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/local
 sudo ldconfig
 ```
-
 Then open the ```.bashrc``` file in ```\home``` directory and add these lines at the very end
 ```
 if [[ ":$LD_LIBRARY_PATH:" != *":/usr/local/lib:"* ]]; then
@@ -76,19 +75,41 @@ cd ~
 ```
 mkdir -p ~/ros2_test/src
 cd ~/ros2_test/src
-git clone 
+git clone https://github.com/Mechazo11/ros2_orb_slam3.git
+cd .. [make sure you are in ~/ros2_ws root directory]
 ```
-  
-5. For this repo, this must be the name of the workspace. You may change it later (marked with "!HARDCODED" comments found in pertinent .hpp and .py files. 
+3. For this repo, the name of the workspace must be ```ros2_test```. You may change it later (marked with "!Change this ...." comments found in pertinent .hpp and .py files.
+
+4. Source ROS2 Humble tools and run colcon build commands
+```
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install
+```
+
+## 3. Monocular Example:
+Run the builtin example to verify the package is working correctly
+In one terminal [cpp node]
+```
+cd ~\ros2_ws
+source install/setup.bash
+ros2 run ros2_orb_slam3 mono_node_cpp --ros-args -p node_name_arg:=mono_slam_cpp
+```
+
+In another terminal [python node]
+```
+cd ~\ros2_ws
+source install/setup.bash
+ros2 run ros2_orb_slam3 mono_driver_node.py --ros-args -p settings_name:=EuRoC -p image_seq:=sample_euroc_MH05
+```
+
+Both nodes would perform a handshake and the VSLAM framework would then work as shown in the following video clip
+TODO video goes here
 
 
-## 3. Monocular Example
-
-
-Thank you for taking the time in checking this project out. 
+Thank you for taking the time in checking this project out. I hope it helps you out. If you find this package useful in your project consider citing the original ORB SLAM3 paper and one of my recent papers shown below
 
 ## To-do:
 - [x] Finish working example and upload code
-- [ ] Detailed installation and usage instructions
+- [x] Detailed installation and usage instructions
 - [ ] Show short video example for monocular mode
 - [ ] Add ORB SLAM3 bibtex and my upcoming paper bibtex
