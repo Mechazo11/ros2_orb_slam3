@@ -11,7 +11,7 @@ NOTES
 #include "ros2_orb_slam3/common.hpp"
 
 //* Constructor
-MonocularMode::MonocularMode() :Node("mono-orb-slam3")
+MonocularMode::MonocularMode() :Node("mono_node_cpp")
 {
     // Declare parameters to be passsed from command line
     // https://roboticsbackend.com/rclcpp-params-tutorial-get-set-ros2-params-with-cpp/
@@ -26,7 +26,6 @@ MonocularMode::MonocularMode() :Node("mono-orb-slam3")
     this->declare_parameter("node_name_arg", "not_given"); // Name of this agent 
     this->declare_parameter("voc_file_arg", "file_not_set"); // Needs to be overriden with appropriate name  
     this->declare_parameter("settings_file_path_arg", "file_path_not_set"); // path to settings file  
-    
     
     //this->declare_parameter("settings_file_name_arg", "file_not_set"); // Depricited, sent by the python node  
 
@@ -69,6 +68,7 @@ MonocularMode::MonocularMode() :Node("mono-orb-slam3")
     subexperimentconfigName = "/mono_py_driver/experiment_settings"; // topic that sends out some configuration parameters to the cpp ndoe
     pubconfigackName = "/mono_py_driver/exp_settings_ack"; // send an acknowledgement to the python node
     subImgMsgName = "/mono_py_driver/img_msg"; // topic to receive RGB image messages
+    subTimestepMsgName = "/mono_py_driver/timestep_msg"; // topic to receive RGB image messages
 
     //* subscribe to python node to receive settings
     expConfig_subscription_ = this->create_subscription<std_msgs::msg::String>(subexperimentconfigName, 1, std::bind(&MonocularMode::experimentSetting_callback, this, _1));
@@ -78,6 +78,9 @@ MonocularMode::MonocularMode() :Node("mono-orb-slam3")
 
     //* subscrbite to the image messages coming from the Python driver node
     subImgMsg_subscription_= this->create_subscription<sensor_msgs::msg::Image>(subImgMsgName, 1, std::bind(&MonocularMode::Img_callback, this, _1));
+
+    //* subscribe to receive the timestep
+    subTimestepMsg_subscription_= this->create_subscription<std_msgs::msg::String>(subTimestepMsgName, 1, std::bind(&MonocularMode::Timestep_callback, this, _1));
 
     
     RCLCPP_INFO(this->get_logger(), "Waiting to finish handshake ......");
@@ -92,6 +95,7 @@ MonocularMode::~MonocularMode()
     // Call method to write the trajectory file
     // Release resources and cleanly shutdown
     pAgent->Shutdown();
+    pass;
 
 }
 
@@ -115,7 +119,7 @@ void MonocularMode::initializeVSLAM(std::string& configString){
     RCLCPP_INFO(this->get_logger(), "settings_file_path %s", settingsFilePath.c_str());
 
     // NOTE if you plan on passing other configuration parameters to ORB SLAM3 Systems class, do it here
-    // Read a "config.yaml" file and populate the following settings
+    // NOTE you may also use a .yaml file here to set these values
     sensorType = ORB_SLAM3::System::MONOCULAR; 
     enablePangolinWindow = true; // Shows Pangolin window output
     enableOpenCVWindow = true; // Shows OpenCV window output
@@ -146,7 +150,15 @@ void MonocularMode::experimentSetting_callback(const std_msgs::msg::String& msg)
 
 }
 
-//* Callback to process image and semantic matrix from python node
+//* Callback that processes timestep sent over ROS
+void MonocularMode::Timestep_callback(const std_msgs::msg::String& time_msg){
+    this->timeStep = "";
+    this->timeStep = time_msg.data.c_str();
+    // std::cout<<"Timestep: "<<this->timeStep<<std::endl;
+}
+
+
+//* Callback to process image message and run SLAM node
 void MonocularMode::Img_callback(const sensor_msgs::msg::Image& msg)
 {
     // std::cout<<"in matImg_callback()"<<std::endl;
@@ -171,15 +183,13 @@ void MonocularMode::Img_callback(const sensor_msgs::msg::Image& msg)
         return;
     }
     
-    // TODO figure out timestep from the image`s name?
-
-    //* Convert timestamp into C++ double
-    // double timestamp = msg.timestamp;
-    double timestamp = 1.0; 
-
+    //* Convert timestep in String to double
+    double timestep = std::stod(this->timeStep); 
+    std::cout<<std::fixed<<"Timestep: "<<timestep<<std::endl;
+   
 
     //* TODO
-    //Sophus::SE3f Tcw = pAgent->TrackMonocular(cv_ptr->image, timestamp); //* Entry point to ORB_SLAM3 pipeline (overloaded TrackMonocular)
+    //Sophus::SE3f Tcw = pAgent->TrackMonocular(cv_ptr->image, timestep); //* Entry point to ORB_SLAM3 pipeline (overloaded TrackMonocular)
     //Sophus::SE3f Twc = Tcw.inverse(); //* Pose with respect to global image coordinate, reserved for future use
 
 }

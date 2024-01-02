@@ -2,14 +2,16 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>ros2_orb_slam3</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <version>1.0.0</version>
+  <description>ROS2 implementation of ORB SLAM3 V1.0</description>
   <maintainer email="azmyin12@gmail.com">tigerwife</maintainer>
-  <license>TODO: License declaration</license>
+  <license>GPL 3.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
   <build_depend>rclcpp</build_depend>
+  <build_depend>rclpy</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>cv_bridge</build_depend>
@@ -23,6 +25,7 @@
   <!-- <depend>your_custom_msg_interface</depend>  -->
   
   <exec_depend>rclcpp</exec_depend>
+  <exec_depend>rclpy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>cv_bridge</exec_depend>

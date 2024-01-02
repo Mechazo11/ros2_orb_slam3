@@ -4,7 +4,6 @@ project(ros2_orb_slam3)
 # Make sure to set this path before building the  
 set(ENV{PYTHONPATH} "/opt/ros/humble/lib/python3.10/site-packages/") # Must be set to match your installation
 
-
 # Must use C++17 to make it compatible with rclcpp
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
@@ -25,7 +24,9 @@ LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules) # REDUNDANT?
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 # find_package(your_custom_msg_interface REQUIRED)
@@ -36,14 +37,14 @@ find_package(Pangolin REQUIRED)
 find_package(image_transport REQUIRED)
 
 
-# Header file locations
-include_directories(include) # This package include
+# Header file locations [C++ node]
+include_directories(include) # Add .hpp, .h files from include/ros2_orb_slam3
 include_directories(${EIGEN3_INCLUDE_DIRS}) # Include headers for eigen3
 include_directories(${Pangolin_INCLUDE_DIRS}) # include headers for pangolin
 include_directories(${OpenCV_INCLUDE_DIRS}) # include headers for pangolin
 
 
-# ORB-SLAM3 includes
+# ORB-SLAM3 includes [VSLAM library]
 include_directories(
   ${PROJECT_SOURCE_DIR}
   ${PROJECT_SOURCE_DIR}/orb_slam3
@@ -57,6 +58,7 @@ include_directories(
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp
+  rclpy
   std_msgs
   sensor_msgs
   # your_custom_msg_interface
@@ -68,7 +70,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 )
 
 #* ORB SLAM3 as a shared library
-# Whenever you add a new .h, .hpp or .cc, .cpp file in the orb_slam3 directory, make sure to add them here as shown below
+# Whenever you add a new .h, .hpp or .cc, .cpp file in the ros2_orb_slam3/orb_slam3/include and os2_orb_slam3/orb_slam3/src directories, make sure to add them here as shown below
 add_library(orb_slam3_lib SHARED
   orb_slam3/src/System.cc
   orb_slam3/src/Tracking.cc
@@ -130,8 +132,7 @@ add_library(orb_slam3_lib SHARED
   orb_slam3/include/Settings.h
 )
 
-
-set_target_properties(orb_slam3_lib PROPERTIES VERSION "${orb_slam3_lib_VERSION}")
+set_target_properties(orb_slam3_lib PROPERTIES VERSION "${orb_slam3_lib_VERSION}") # TODO need to findout why this is required
 
 ament_target_dependencies(orb_slam3_lib
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
@@ -151,7 +152,7 @@ target_link_libraries(orb_slam3_lib
 )
 
 
-# Find the .so files built inside orb_slam3/Thirdparty projects
+# Find the .so files provided in ros2_orb_slam3/orb_slam3/Thirdparty projects
 set(DBoW2_PATH "${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/DBoW2/lib/libDBoW2.so")
 set(g2o_PATH "${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/g2o/lib/libg2o.so")
 
@@ -193,6 +194,17 @@ ament_export_include_directories(include)
 ament_export_dependencies(
   orb_slam3_lib
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
+)
+
+
+# Python node
+# Install Python modules, submodules
+ament_python_install_package(${PROJECT_NAME}) # Install the modules in ros2_orb_slam3/ros2_orb_slam3 folder
+
+# Install Python executibles
+install(PROGRAMS
+  scripts/mono_driver_node.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 
