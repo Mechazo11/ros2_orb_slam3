@@ -103,7 +103,11 @@ ros2 run ros2_orb_slam3 mono_driver_node.py --ros-args -p settings_name:=EuRoC -
 ```
 
 Both nodes would perform a handshake and the VSLAM framework would then work as shown in the following video clip
-TODO video goes here
+
+
+https://github.com/Mechazo11/ros2_orb_slam3/assets/44814419/af9eaa79-da4b-4405-a4d7-e09242ab9660
+
+
 
 
 Thank you for taking the time in checking this project out. I hope it helps you out. If you find this package useful in your project consider citing the original ORB SLAM3 paper and one of my recent papers shown below
