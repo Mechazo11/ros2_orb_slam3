@@ -12,6 +12,7 @@
 #include <thread> // class to represent individual threads of execution.
 #include <mutex> // A mutex is a lockable object that is designed to signal when critical sections of code need exclusive access, preventing other threads with the same protection from executing concurrently and access the same memory locations.
 #include <cstdlib> // to find home directory
+#include <sstream> // String stream processing functionalities
 
 //* ROS2 includes
 //* std_msgs in ROS 2 https://docs.ros2.org/foxy/api/std_msgs/index-msg.html

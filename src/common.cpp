@@ -99,35 +99,6 @@ MonocularMode::~MonocularMode()
 
 }
 
-//* Method to bind an initialized VSLAM framework to this node
-void MonocularMode::initializeVSLAM(std::string& configString){
-    
-    // Watchdog, if the paths to vocabular and settings files are still not set
-    if (vocFilePath == "file_not_set" || settingsFilePath == "file_not_set")
-    {
-        RCLCPP_ERROR(get_logger(), "Please provide valid voc_file and settings_file paths");       
-        rclcpp::shutdown();
-    } 
-    
-    //* Build the full path to the .yaml settings file
-    
-    // TODO extract the name of the setting_file sent by the Python node here
-    
-    // settingsFilePath = settingsFilePath.append(param4.as_string());
-    // settingsFilePath = settingsFilePath.append(".yaml"); // ros2_ws/src/orb_slam3_ros2/orb_slam3/config/Monocular/TUM2.yaml
-
-    RCLCPP_INFO(this->get_logger(), "settings_file_path %s", settingsFilePath.c_str());
-
-    // NOTE if you plan on passing other configuration parameters to ORB SLAM3 Systems class, do it here
-    // NOTE you may also use a .yaml file here to set these values
-    sensorType = ORB_SLAM3::System::MONOCULAR; 
-    enablePangolinWindow = true; // Shows Pangolin window output
-    enableOpenCVWindow = true; // Shows OpenCV window output
-    
-    // pAgent = new ORB_SLAM3::System(vocFilePath, settingsFilePath, sensorType, experimentConfig, agentName, enableOpenCVWindow, enablePangolinWindow);
-    // std::cout << "MonocularMode node initialized" << std::endl; // TODO needs a better message
-}
-
 //* Callback which accepts experiment parameters from the Python node
 void MonocularMode::experimentSetting_callback(const std_msgs::msg::String& msg){
     
@@ -149,6 +120,42 @@ void MonocularMode::experimentSetting_callback(const std_msgs::msg::String& msg)
     // initializeVSLAM(experimentConfig);
 
 }
+
+//* Method to bind an initialized VSLAM framework to this node
+void MonocularMode::initializeVSLAM(std::string& configString){
+    
+    // Watchdog, if the paths to vocabular and settings files are still not set
+    if (vocFilePath == "file_not_set" || settingsFilePath == "file_not_set")
+    {
+        RCLCPP_ERROR(get_logger(), "Please provide valid voc_file and settings_file paths");       
+        rclcpp::shutdown();
+    } 
+    
+    //* Extract the .yaml file`s name and build its full path.
+    std::istringstream iss(experimentConfig);
+    std::string firstPart;
+
+    std::getline(iss, firstPart, '/');
+    
+    RCLCPP_INFO(this->get_logger(), "First part %s", firstPart.c_str());
+
+    //! RESUME FROM HERE
+
+    // settingsFilePath = settingsFilePath.append(param4.as_string());
+    // settingsFilePath = settingsFilePath.append(".yaml"); // ros2_ws/src/orb_slam3_ros2/orb_slam3/config/Monocular/TUM2.yaml
+
+    RCLCPP_INFO(this->get_logger(), "settings_file_path %s", settingsFilePath.c_str());
+
+    // NOTE if you plan on passing other configuration parameters to ORB SLAM3 Systems class, do it here
+    // NOTE you may also use a .yaml file here to set these values
+    sensorType = ORB_SLAM3::System::MONOCULAR; 
+    enablePangolinWindow = true; // Shows Pangolin window output
+    enableOpenCVWindow = true; // Shows OpenCV window output
+    
+    // pAgent = new ORB_SLAM3::System(vocFilePath, settingsFilePath, sensorType, experimentConfig, agentName, enableOpenCVWindow, enablePangolinWindow);
+    // std::cout << "MonocularMode node initialized" << std::endl; // TODO needs a better message
+}
+
 
 //* Callback that processes timestep sent over ROS
 void MonocularMode::Timestep_callback(const std_msgs::msg::String& time_msg){
@@ -185,9 +192,8 @@ void MonocularMode::Img_callback(const sensor_msgs::msg::Image& msg)
     
     //* Convert timestep in String to double
     double timestep = std::stod(this->timeStep); 
-    std::cout<<std::fixed<<"Timestep: "<<timestep<<std::endl;
+    // std::cout<<std::fixed<<"Timestep: "<<timestep<<std::endl; // Debug
    
-
     //* TODO
     //Sophus::SE3f Tcw = pAgent->TrackMonocular(cv_ptr->image, timestep); //* Entry point to ORB_SLAM3 pipeline (overloaded TrackMonocular)
     //Sophus::SE3f Twc = Tcw.inverse(); //* Pose with respect to global image coordinate, reserved for future use
