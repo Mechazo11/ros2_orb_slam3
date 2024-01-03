@@ -115,5 +115,7 @@ Thank you for taking the time in checking this project out. I hope it helps you 
 ## To-do:
 - [x] Finish working example and upload code
 - [x] Detailed installation and usage instructions
-- [ ] Show short video example for monocular mode
+- [x] Show short video example for monocular mode
+- [ ] Stereo mode example
+- [ ] RGBD mode example
 - [ ] Add ORB SLAM3 bibtex and my upcoming paper bibtex
