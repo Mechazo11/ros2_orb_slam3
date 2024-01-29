@@ -1,12 +1,12 @@
 # ROS2 ORB SLAM3 V1.0 package
 
-A ROS2 package for ORB SLAM3 V1.0. Focus is on native integration with ROS2 ecosystem. My goal is to provide a "bare-bones" starting point for developers in using ORB SLAM3 framework in their ROS 2 projects. Hence, this package will not use more advanced features of ROS 2 such as rviz, tf and launch files. This project structure is heavily influenced by the excellent ROS1 port of ORB SLAM3 by thien94, https://github.com/thien94/orb_slam3_ros/tree/master
+A ROS2 package for ORB SLAM3 V1.0. Focus is on native integration with ROS2 ecosystem. My goal is to provide a "bare-bones" starting point for developers in using ORB SLAM3 framework in their ROS 2 projects. Hence, this package will not use more advanced features of ROS 2 such as rviz, tf and launch files. This project structure is heavily influenced by the excellent ROS1 port of ORB SLAM3 by [thien94](https://github.com/thien94/orb_slam3_ros/tree/master). 
 
 ## 0. Preamble
 * This package builds [ORB-SLAM3](https://github.com/UZ-SLAMLab/ORB_SLAM3) V1.0 as a shared internal library. Comes included with a number of Thirdparty libraries [DBoW2, g2o, Sophus]
-* g2o used is an older version and is incompatible with the recent version.
+* g2o used is an older version and is incompatible with the latest release found here [g2o github page](https://github.com/RainerKuemmerle/g2o).
 * This package differs from other ROS1 wrappers, thien94`s ROS 1 port and ROS 2 wrappers in GitHub by supprting/adopting the following
-  * A separate python node to send data to the ORB-SLAM3 cpp node. This is a purely design choice.
+  * A separate python node to send data to the ORB-SLAM3 cpp node. This is purely a design choice.
   * At least C++17 and Cmake>=3.8
   * Eigen 3.3.0, OpenCV 4.2, latest release of Pangolin
 * Comes with a small test image sequence from EuRoC MAV dataset (MH05) to quickly test installation
