@@ -20,6 +20,7 @@
   <build_depend>boost_system</build_depend>
   <build_depend>boost_serialization</build_depend>
   <build_depend>libcrypto</build_depend>
+  <build_depend>python3-natsort</build_depend>
 
   <!-- As suggested by the official tutorial, add your custom message interfaces as follows -->
   <!-- <depend>your_custom_msg_interface</depend>  -->
@@ -34,6 +35,7 @@
   <exec_depend>boost_system</exec_depend>
   <exec_depend>boost_serialization</exec_depend>
   <exec_depend>libcrypto</exec_depend>
+  <exec_depend>python3-natsort</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
