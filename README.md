@@ -35,8 +35,8 @@ We install Pangolin system wide and configure the dynamic library path so the ne
 cd ~/Documents
 git clone https://github.com/stevenlovegrove/Pangolin
 cd Pangolin
-./scripts/install_prerequisites.sh --dry-run recommended [Check what recommended softwares needs to be installed]
-./scripts/install_prerequisites.sh recommended [Install recommended dependencies]
+./scripts/install_prerequisites.sh --dry-run recommended # Check what recommended softwares needs to be installed
+./scripts/install_prerequisites.sh recommended # Install recommended dependencies
 cmake -B build
 cmake --build build -j4
 sudo cmake --install build
@@ -79,7 +79,7 @@ cd ~
 mkdir -p ~/ros2_test/src
 cd ~/ros2_test/src
 git clone https://github.com/Mechazo11/ros2_orb_slam3.git
-cd .. [make sure you are in ~/ros2_ws root directory]
+cd .. # make sure you are in ~/ros2_ws root directory
 ```
 3. For this repo, the name of the workspace must be ```ros2_test```. You may change it later (marked with "!Change this ...." comments found in pertinent .hpp and .py files.
 
