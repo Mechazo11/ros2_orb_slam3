@@ -1,5 +1,6 @@
+
 cmake_minimum_required(VERSION 3.8)
-project(ros2_orb_slam3)
+project(slam)
 
 # Make sure to set this path before building the  
 set(ENV{PYTHONPATH} "/opt/ros/humble/lib/python3.10/site-packages/") # Must be set to match your installation
@@ -100,36 +101,6 @@ add_library(orb_slam3_lib SHARED
   orb_slam3/src/TwoViewReconstruction.cc
   orb_slam3/src/Config.cc
   orb_slam3/src/Settings.cc
-  orb_slam3/include/System.h
-  orb_slam3/include/Tracking.h
-  orb_slam3/include/LocalMapping.h
-  orb_slam3/include/LoopClosing.h
-  orb_slam3/include/ORBextractor.h
-  orb_slam3/include/ORBmatcher.h
-  orb_slam3/include/FrameDrawer.h
-  orb_slam3/include/Converter.h
-  orb_slam3/include/MapPoint.h
-  orb_slam3/include/KeyFrame.h
-  orb_slam3/include/Atlas.h
-  orb_slam3/include/Map.h
-  orb_slam3/include/MapDrawer.h
-  orb_slam3/include/Optimizer.h
-  orb_slam3/include/Frame.h
-  orb_slam3/include/KeyFrameDatabase.h
-  orb_slam3/include/Sim3Solver.h
-  orb_slam3/include/Viewer.h
-  orb_slam3/include/ImuTypes.h
-  orb_slam3/include/G2oTypes.h
-  orb_slam3/include/CameraModels/GeometricCamera.h
-  orb_slam3/include/CameraModels/Pinhole.h
-  orb_slam3/include/CameraModels/KannalaBrandt8.h
-  orb_slam3/include/OptimizableTypes.h
-  orb_slam3/include/MLPnPsolver.h
-  orb_slam3/include/GeometricTools.h
-  orb_slam3/include/TwoViewReconstruction.h
-  orb_slam3/include/SerializationUtils.h
-  orb_slam3/include/Config.h
-  orb_slam3/include/Settings.h
 )
 
 set_target_properties(orb_slam3_lib PROPERTIES VERSION "${orb_slam3_lib_VERSION}") # TODO need to findout why this is required
@@ -162,16 +133,15 @@ install(FILES ${g2o_PATH} DESTINATION lib)
 
 
 # Add executable
-add_executable(mono_node_cpp
-  src/mono_example.cpp
-  src/common.cpp
+add_executable(orbslam3_mono_node
+	src/monocular.cpp
 )
 
-ament_target_dependencies(mono_node_cpp
+ament_target_dependencies(orbslam3_mono_node
   PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
-target_link_libraries(mono_node_cpp PUBLIC orb_slam3_lib) # Link a node with the internal shared library
+target_link_libraries(orbslam3_mono_node PUBLIC orb_slam3_lib) # Link a node with the internal shared library
 
 
 # Install all the header files in package/package/include
@@ -180,7 +150,7 @@ install (DIRECTORY include/
 )
 
 # Install our node and library
-install(TARGETS mono_node_cpp orb_slam3_lib
+install(TARGETS orbslam3_mono_node orb_slam3_lib
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
@@ -200,12 +170,5 @@ ament_export_dependencies(
 # Python node
 # Install Python modules, submodules
 ament_python_install_package(${PROJECT_NAME}) # Install the modules in ros2_orb_slam3/ros2_orb_slam3 folder
-
-# Install Python executibles
-install(PROGRAMS
-  scripts/mono_driver_node.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-
 
 ament_package()
