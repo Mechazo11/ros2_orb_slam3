@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.8)
 project(slam)
 
@@ -29,6 +28,8 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 # find_package(your_custom_msg_interface REQUIRED)
 find_package(cv_bridge REQUIRED)
@@ -36,6 +37,7 @@ find_package(OpenCV 4.2 REQUIRED)
 find_package(Eigen3 3.3.0 REQUIRED) # Matched with Sophus
 find_package(Pangolin REQUIRED)
 find_package(image_transport REQUIRED)
+find_package(custom_interfaces REQUIRED)
 
 
 # Header file locations [C++ node]
@@ -54,6 +56,7 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty
   ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/Sophus
   ${ament_INCLUDE_DIRS}
+  $<INSTALL_INTERFACE:include>
 )
 
 
@@ -61,6 +64,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp
   rclpy
   std_msgs
+  visualization_msgs
+  std_srvs
   sensor_msgs
   # your_custom_msg_interface
   cv_bridge
@@ -68,6 +73,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   OpenCV
   Eigen3
   Pangolin
+  custom_interfaces
 )
 
 #* ORB SLAM3 as a shared library
@@ -131,10 +137,10 @@ set(g2o_PATH "${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/g2o/lib/libg2o.so")
 install(FILES ${DBoW2_PATH} DESTINATION lib)
 install(FILES ${g2o_PATH} DESTINATION lib)
 
-
 # Add executable
 add_executable(orbslam3_mono_node
-	src/monocular.cpp
+	src/orbslam3/monocular.cpp
+	src/orbslam3/monocular_driver.cpp
 )
 
 ament_target_dependencies(orbslam3_mono_node

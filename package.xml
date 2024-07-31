@@ -13,6 +13,7 @@
   <build_depend>rclcpp</build_depend>
   <build_depend>rclpy</build_depend>
   <build_depend>std_msgs</build_depend>
+  <build_depend>visualization_msgs</build_depend>
   <build_depend>std_srvs</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>cv_bridge</build_depend>
@@ -24,11 +25,13 @@
   <build_depend>python3-natsort</build_depend>
 
   <!-- As suggested by the official tutorial, add your custom message interfaces as follows -->
-  <!-- <depend>your_custom_msg_interface</depend>  -->
+  <depend>custom_interfaces</depend>
   
   <exec_depend>rclcpp</exec_depend>
   <exec_depend>rclpy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>image_transport</exec_depend>
