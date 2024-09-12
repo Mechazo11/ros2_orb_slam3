@@ -5,12 +5,16 @@ A ROS2 package for ORB SLAM3 V1.0. Focus is on native integration with ROS2 ecos
 If you find this work useful please consider citing the original ORB-SLAM3 paper and my recent paper that uses this package in solving short-term relocalization (kidnapped robot problem) as shown below
 
 ```bibtex
-@article{kamal2024solving,
-  title={Solving Short-Term Relocalization Problems In Monocular Keyframe Visual SLAM Using Spatial And Semantic Data},
-  author={Kamal, Azmyin Md and Dadson, Nenyi KN and Gegg, Donovan and Barbalata, Corina},
-  journal={arXiv preprint arXiv:2407.19518},
-  year={2024}
-}
+@INPROCEEDINGS{kamal2024solving,
+  author={Kamal, Azmyin Md. and Dadson, Nenyi Kweku Nkensen and Gegg, Donovan and Barbalata, Corina},
+  booktitle={2024 IEEE International Conference on Advanced Intelligent Mechatronics (AIM)}, 
+  title={Solving Short-Term Relocalization Problems In Monocular Keyframe Visual SLAM Using Spatial And Semantic Data}, 
+  year={2024},
+  volume={},
+  number={},
+  pages={615-622},
+  keywords={Visualization;Simultaneous localization and mapping;Accuracy;Three-dimensional displays;Semantics;Robot vision systems;Pipelines},
+  doi={10.1109/AIM55361.2024.10637187}}
 ```
 
 ```bibtex
