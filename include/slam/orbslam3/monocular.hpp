@@ -8,11 +8,10 @@
 #include <chrono>
 #include <memory>
 
-#include "rclcpp/rclcpp.hpp"
+#include "slam/node.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 #include "std_srvs/srv/trigger.hpp"
-#include "custom_interfaces/srv/startup_slam.hpp"
 
 #include <cv_bridge/cv_bridge.h>
 // ORB_SLAM3 related includes
@@ -22,34 +21,33 @@
 #include "Tracking.h"
 #include "MapPoint.h"
 
-class MonocularSlamNode : public rclcpp::Node
+class ORBSLAM3SlamNode : public SlamNode<eSlamType::ORBSLAM3>
 {
 
 public:
 
-    MonocularSlamNode();
+    ORBSLAM3SlamNode();
 
 
-    ~MonocularSlamNode();
+    ~ORBSLAM3SlamNode();
 
 
-private: 
+private:
+
 	// Node Configurations
 	std::string mpCameraTopicName;
 	std::string mpSlamSettingsFilePath;
 	std::string mpVocabFilePath;
 
 	// ORB_SLAM3 related attributes
-	std::unique_ptr<ORB_SLAM3::System> mpSlam = nullptr;
 	ORB_SLAM3::Tracking::eTrackingState mpState;
 	// Image pointer for receiving and passing images to SLAM
     cv_bridge::CvImagePtr m_cvImPtr;
 	// Output of Tracking method
-	Sophus::SE3f Tcw;
 	
 	// Publishers, Subscribers, Services and Actions
 	rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr mpFrameSubscriber;
-    // rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr mpAnnotatedFramePublisher;
+    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr mpAnnotatedFramePublisher;
     // rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr mpMapPublisher;
 	rclcpp::Service<custom_interfaces::srv::StartupSlam>::SharedPtr mpSlamStartupService;
 	rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr mpSlamShutdownService;
@@ -58,15 +56,14 @@ private:
 	void InitialiseSlamNode(std::shared_ptr<custom_interfaces::srv::StartupSlam::Request> request,
 		std::shared_ptr<custom_interfaces::srv::StartupSlam::Response> response);
     void GrabImage(const sensor_msgs::msg::Image::SharedPtr msg);
+	void PublishFrame();
 
     // void UpdateSLAMState();
     //
     // void UpdateMapState();
     //
     //
-    // void PublishFrame();
     //
-    // void PublishCurrentCamera();
     //
     // void InitializeMarkersPublisher( const string &strSettingPath);
     // void PublishMapPoints();
