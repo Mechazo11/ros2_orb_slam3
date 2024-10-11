@@ -42,12 +42,14 @@ find_package(custom_interfaces REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(Yaml-cpp REQUIRED)
 
 # Header file locations [C++ node]
 include_directories(include) # Add .hpp, .h files from include/ros2_orb_slam3
 include_directories(${EIGEN3_INCLUDE_DIRS}) # Include headers for eigen3
 include_directories(${Pangolin_INCLUDE_DIRS}) # include headers for pangolin
 include_directories(${OpenCV_INCLUDE_DIRS}) # include headers for pangolin
+include_directories(${YAMLCPP_INCLUDE_DIR})
 
 
 # ORB-SLAM3 includes [VSLAM library]
@@ -157,7 +159,10 @@ ament_target_dependencies(orbslam3_mono_node
   PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
-target_link_libraries(orbslam3_mono_node PUBLIC orb_slam3_lib) # Link a node with the internal shared library
+target_link_libraries(orbslam3_mono_node 
+	PUBLIC orb_slam3_lib
+  	PUBLIC ${YAMLCPP_LIBRARY}
+	PUBLIC yaml-cpp) # Link a node with the internal shared library
 
 
 # Install all the header files in package/package/include

@@ -7,8 +7,13 @@
 #include <opencv2/core/core.hpp>
 #include <memory>
 #include <thread>
+#include <exception>
 #include "custom_interfaces/srv/startup_slam.hpp"
 #include "std_srvs/srv/trigger.hpp"
+#include <yaml-cpp/yaml.h>
+#include <filesystem>
+#include <string>
+#include "rclcpp/rclcpp.hpp"
 
 using StartupSlam = custom_interfaces::srv::StartupSlam;
 using ShutdownSlam = std_srvs::srv::Trigger;
@@ -42,35 +47,63 @@ enum eSlamType{
 	ORBSLAM3=0
 };
 
-template<eSlamType slamType>
 class Slam{
 	public:
-		Slam(){
-			mpSlam = nullptr;
-		};
-		void InitialiseSlam(
+		Slam(rclcpp::Logger logger);
+		virtual void InitialiseSlam(
 				std::shared_ptr<custom_interfaces::srv::StartupSlam::Request> request,
-				std::shared_ptr<custom_interfaces::srv::StartupSlam::Response> response);
-		void Shutdown(){
-			if(slamType == eSlamType::ORBSLAM3){
-				mpSlam->Shutdown();
-			}
-		}
-
-		cv::Mat GetCurrentFrame(){
-			return mpSlam->GetCurrentFrame();
-		}
-
-		void TrackMonocular(Frame &frame, Sophus::SE3f &tcw);
-	private:
-		eSlamType mpSlamType = slamType;
-		// ORBSLAM3 Related pointers
-		std::unique_ptr<ORB_SLAM3::System> mpSlam = nullptr;
-		int GetTrackingState();
-		Sophus::SE3f GetCurrentPosition();
-		
+				std::shared_ptr<custom_interfaces::srv::StartupSlam::Response> response) = 0;
+		virtual void Shutdown() = 0;
+		virtual cv::Mat GetCurrentFrame() = 0;
+		virtual void TrackMonocular(Frame &frame, Sophus::SE3f &tcw) = 0;
+		rclcpp::Logger mpLogger;
+	private:	
+		// Getter Methods
+		virtual int GetTrackingState() = 0;
 };
 
-template class Slam<eSlamType::ORBSLAM3>;
+class MonoORBSLAM3 : public Slam{
+	public:
+		MonoORBSLAM3(rclcpp::Logger logger);
+		~MonoORBSLAM3(){
+			if(mpORBSlam3){
+				mpORBSlam3->Shutdown();
+			}
+			RCLCPP_INFO(mpLogger, "Destroying Slam3 object");
+		}
+
+		void Shutdown(){
+			if(mpORBSlam3){
+				mpORBSlam3->Shutdown();
+			}
+		}
+		cv::Mat GetCurrentFrame(){
+			if(mpORBSlam3){
+				return mpORBSlam3->GetCurrentFrame();
+			}
+			else{
+				return cv::Mat();
+			}
+		};
+		void TrackMonocular(Frame &frame, Sophus::SE3f &tcw);
+		void InitialiseSlam(std::shared_ptr<custom_interfaces::srv::StartupSlam::Request> request, std::shared_ptr<custom_interfaces::srv::StartupSlam::Response> response);
+	private:
+		// ORBSLAM3 Related pointers
+		std::string mpVocabFilePath = "";
+		std::string mpSettingsFilePath = "";
+		ORB_SLAM3::System::eSensor mpCameraType;
+		std::unique_ptr<ORB_SLAM3::System> mpORBSlam3 = nullptr;
+		
+		int GetTrackingState(){
+			if(mpORBSlam3){
+				return mpORBSlam3->GetTrackingState();
+			}
+			else{
+				return -1;
+			}
+		};
+};
+
+typedef MonoORBSLAM3 MonoORBSLAM3;
 
 #endif

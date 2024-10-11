@@ -1,0 +1,2 @@
+Slam.SettingsFilePath: "/ws/ros_ws/src/slam/orb_slam3/config/Monocular/tello.yaml"
+Slam.VocabFilePath: "/ws/ros_ws/src/slam/orb_slam3/Vocabulary/ORBvoc.txt.bin"

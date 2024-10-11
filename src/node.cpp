@@ -1,50 +1,20 @@
 #include "slam/node.hpp"
 
-template<eSlamType slamType>
-SlamNode<slamType>::SlamNode(std::string nodeName)
+SlamNode::SlamNode(std::string nodeName)
 :	rclcpp::Node(nodeName){
 	RCLCPP_INFO(this->get_logger(), "Initialising Slam Node");
 }
 
-template<eSlamType slamType>
-void SlamNode<slamType>::InitialiseSlamNode(std::shared_ptr<StartupSlam::Request> request,
+void SlamNode::InitialiseSlamNode(std::shared_ptr<StartupSlam::Request> request,
 		std::shared_ptr<StartupSlam::Response> response){
-
-	RCLCPP_INFO(this->get_logger(), "Setting ORBSLAM3 and initiasing node");
-	mpCameraTopicName = request->camera_topic;
-	mpSlamSettingsFilePath = request->config_file_path;
-
-	std::string camera_topic_message = "Got Camera topic name: " + mpCameraTopicName;
-	RCLCPP_INFO(this->get_logger(), camera_topic_message.c_str());
-
-	std::string settings_file_path_message = "Got Settings file path: " + mpSlamSettingsFilePath;
-	RCLCPP_INFO(this->get_logger(), settings_file_path_message.c_str());
-	
-	std::string vocab_file_path_message = "Got Vocab file path: " + mpVocabFilePath;
-	RCLCPP_INFO(this->get_logger(), vocab_file_path_message.c_str());
-
-	if(mpSlam){
-		mpSlam->Shutdown();
-	}
-	RCLCPP_INFO(this->get_logger(), "Creating ORBSLAM3 object");
-	if(mpSlamType == "orbslam3"){
-		mpSlam->InitialiseSlam(request, response);
-	}
-	// TODO need to check if we can directly start the subscriber just after creating the slam object
-	response->success = true;
-	response->message = "Successfully created SLAM object and required subscribers";
-	RCLCPP_INFO(this->get_logger(), "ORBSLAM3 initialisation complete");
-
-	// InitializeMarkersPublisher(mpSlamSettingsFilePath);
+	RCLCPP_INFO(this->get_logger(), "Initialising Base Node");
 }
 
-template<eSlamType slamType>
-void SlamNode<slamType>::Update(){
+void SlamNode::Update(){
 	PublishPositionAsTransform(mpTcw);
 }
 
-template<eSlamType slamType>
-void SlamNode<slamType>::PublishPositionAsTransform(Sophus::SE3f &tcw) {
+void SlamNode::PublishPositionAsTransform(Sophus::SE3f &tcw) {
 	// Get transform from map to camera frame                             
 	cv::Mat Tcw = cv::Mat(4, 4, CV_32F, tcw.matrix().data());
 	tf2::Transform tf_transform = this->TransformFromMat(Tcw);             
@@ -60,16 +30,19 @@ void SlamNode<slamType>::PublishPositionAsTransform(Sophus::SE3f &tcw) {
 	// tf_map2target_stamped = tf2::Stamped<tf2::Transform>(tf_map2target, this->now(), map_frame_id_param_);
 	geometry_msgs::msg::TransformStamped msg;
 	msg.header.stamp = this->get_clock()->now();
-	msg.header.frame_id = "map";
-	msg.child_frame_id = "slam";
+	msg.header.frame_id = "world";
+	msg.child_frame_id = "camera";
 	msg.transform = tf2::toMsg(tf_map2target);
-	// msg.child_frame_id = target_frame_id_param_;                          
+	RCLCPP_DEBUG(this->get_logger(), "Received the following transform:");
+	RCLCPP_DEBUG(this->get_logger(), "Translation x: %f\ty: %f\tz: %f", msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.y);
+	RCLCPP_DEBUG(this->get_logger(), "Rotation x: %f\ty: %f\tz: %f\tw: %f", msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.y, msg.transform.rotation.w);
+	RCLCPP_DEBUG(this->get_logger(), "Publishing Computed Slam Transform");
+	// // msg.child_frame_id =  target_frame_id_param_;                          
 	// Broadcast tf                                                       
 	mpTfBroadcaster->sendTransform(msg);
 }
 
-template<eSlamType slamType>
-tf2::Transform SlamNode<slamType>::TransformFromMat (cv::Mat position_mat) {
+tf2::Transform SlamNode::TransformFromMat (cv::Mat position_mat) {
 	cv::Mat rotation(3,3,CV_32F);
 	cv::Mat translation(3,1,CV_32F);
 
@@ -104,8 +77,7 @@ tf2::Transform SlamNode<slamType>::TransformFromMat (cv::Mat position_mat) {
 	return tf2::Transform (tf_camera_rotation, tf_camera_translation);
 }
 
-// template<eSlamType slamType>
-// tf2::Transform SlamNode<slamType>::TransformToTarget (tf2::Transform tf_in, std::string frame_in, std::string frame_target) {
+// tf2::Transform SlamNode::TransformToTarget (tf2::Transform tf_in, std::string frame_in, std::string frame_target) {
 // 	// Transform tf_in from frame_in to frame_target
 // 	tf2::Transform tf_map2orig = tf_in;
 // 	tf2::Transform tf_orig2target;
