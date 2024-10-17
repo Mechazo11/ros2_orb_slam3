@@ -2,6 +2,35 @@
 
 A ROS2 package for ORB SLAM3 V1.0. Focus is on native integration with ROS2 ecosystem. My goal is to provide a "bare-bones" starting point for developers in using ORB SLAM3 framework in their ROS 2 projects. Hence, this package will not use more advanced features of ROS 2 such as rviz, tf and launch files. This project structure is heavily influenced by the excellent ROS1 port of ORB SLAM3 by [thien94](https://github.com/thien94/orb_slam3_ros/tree/master). 
 
+If you find this work useful please consider citing the original ORB-SLAM3 paper and my recent paper that uses this package in solving short-term relocalization (kidnapped robot problem) as shown below
+
+```bibtex
+@INPROCEEDINGS{kamal2024solving,
+  author={Kamal, Azmyin Md. and Dadson, Nenyi Kweku Nkensen and Gegg, Donovan and Barbalata, Corina},
+  booktitle={2024 IEEE International Conference on Advanced Intelligent Mechatronics (AIM)}, 
+  title={Solving Short-Term Relocalization Problems In Monocular Keyframe Visual SLAM Using Spatial And Semantic Data}, 
+  year={2024},
+  volume={},
+  number={},
+  pages={615-622},
+  keywords={Visualization;Simultaneous localization and mapping;Accuracy;Three-dimensional displays;Semantics;Robot vision systems;Pipelines},
+  doi={10.1109/AIM55361.2024.10637187}}
+```
+
+```bibtex
+@article{ORBSLAM3_TRO,
+  title={{ORB-SLAM3}: An Accurate Open-Source Library for Visual, Visual-Inertial 
+           and Multi-Map {SLAM}},
+  author={Campos, Carlos AND Elvira, Richard AND G\´omez, Juan J. AND Montiel, 
+          Jos\'e M. M. AND Tard\'os, Juan D.},
+  journal={IEEE Transactions on Robotics}, 
+  volume={37},
+  number={6},
+  pages={1874-1890},
+  year={2021}
+ }
+```
+
 ## 0. Preamble
 * This package builds [ORB-SLAM3](https://github.com/UZ-SLAMLab/ORB_SLAM3) V1.0 as a shared internal library. Comes included with a number of Thirdparty libraries [DBoW2, g2o, Sophus]
 * g2o used is an older version and is incompatible with the latest release found here [g2o github page](https://github.com/RainerKuemmerle/g2o).
@@ -111,8 +140,6 @@ Both nodes would perform a handshake and the VSLAM framework would then work as 
 https://github.com/Mechazo11/ros2_orb_slam3/assets/44814419/af9eaa79-da4b-4405-a4d7-e09242ab9660
 
 
-
-
 Thank you for taking the time in checking this project out. I hope it helps you out. If you find this package useful in your project consider citing the original ORB SLAM3 paper and one of my recent papers shown below
 
 ## To-do:
@@ -121,4 +148,4 @@ Thank you for taking the time in checking this project out. I hope it helps you 
 - [x] Show short video example for monocular mode
 - [ ] Stereo mode example
 - [ ] RGBD mode example
-- [ ] Add ORB SLAM3 bibtex and my IEE AIM 2024 paper
+- [x] Update bibtex to use my IEEE AIM 2024 paper from google scholar
