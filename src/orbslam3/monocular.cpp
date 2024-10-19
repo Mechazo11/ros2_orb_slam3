@@ -82,7 +82,18 @@ void MonocularSlamNode::GrabImage(const ImageMsg::SharedPtr msg)
 	int nsec = msg->header.stamp.nanosec;
 	long timestamp = sec * 1e9 + nsec;
    	Frame frame = Frame(std::make_shared<cv::Mat>(m_cvImPtr->image), timestamp);
-	mpSlam->TrackMonocular(frame, mpTcw);
+	Sophus::SE3f tcw;
+	mpSlam->TrackMonocular(frame, tcw);
+	// The output of ORBSLAM3 is the transformation that can convert points
+	// from world frame to camera frame. Thus, Tcw * Xw would be equivalent to
+	// Xw to Xc. To get the position of the camera with respect to slam origin,
+	// the transformation needs to be inverted to obtain camera position in 
+	// world reference
+	// The following link documents an issue related to this in ORBSLAM2 repo
+	// https://github.com/raulmur/ORB_SLAM2/issues/226
+	// One may also refer to the following link to check the implementation of
+	// of inverse for Sophus::SE3f 
+	mpTwc = tcw.inverse();
 	// Publishes all data common to all SLAM algorithms
 	Update();
     
