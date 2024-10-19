@@ -12,7 +12,7 @@ bool readYAMLFile(std::string &yamlPath, YAML::Node &output);
 class SlamNode : public rclcpp::Node{
 	public:
 		SlamNode(std::string nodeName);
-		Sophus::SE3f mpTcw;
+		Sophus::SE3f mpTwc;
 	protected:
 		void Update();
 		std::unique_ptr<tf2_ros::TransformBroadcaster> mpTfBroadcaster;
@@ -25,8 +25,6 @@ class SlamNode : public rclcpp::Node{
 
 		// Publication Callbacks
 		void PublishPositionAsTransform(Sophus::SE3f &Tcw);
-		tf2::Transform TransformFromMat(cv::Mat position_mat);
-		tf2::Transform TransformToTarget(tf2::Transform tf_in, std::string frame_in, std::string frame_target);
 		void PublishState(int trackingState);
 
 		// Startup/Shutdown Services
