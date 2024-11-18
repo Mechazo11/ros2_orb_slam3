@@ -43,6 +43,7 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(Yaml-cpp REQUIRED)
+find_package(MORB_SLAM REQUIRED COMPONENTS MORB_SLAM DBoW2 g2o sophus)
 
 # Header file locations [C++ node]
 include_directories(include) # Add .hpp, .h files from include/ros2_orb_slam3
@@ -154,8 +155,16 @@ add_executable(orbslam3_mono_node
 	src/orbslam3/monocular.cpp
 	src/orbslam3/monocular_driver.cpp
 )
+add_executable(morbslam_mono_node
+	src/node.cpp
+	src/slam.cpp
+	src/morbslam/monocular.cpp
+)
 
 ament_target_dependencies(orbslam3_mono_node
+  PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS}
+)
+ament_target_dependencies(morbslam_mono_node
   PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
@@ -163,6 +172,13 @@ target_link_libraries(orbslam3_mono_node
 	PUBLIC orb_slam3_lib
   	PUBLIC ${YAMLCPP_LIBRARY}
 	PUBLIC yaml-cpp) # Link a node with the internal shared library
+target_link_libraries(morbslam_mono_node
+	PUBLIC MORB_SLAM::MORB_SLAM
+	PUBLIC MORB_SLAM::DBoW2
+	PUBLIC MORB_SLAM::g2o
+	PUBLIC MORB_SLAM::sophus
+  	PUBLIC ${YAMLCPP_LIBRARY}
+	PUBLIC yaml-cpp)
 
 
 # Install all the header files in package/package/include

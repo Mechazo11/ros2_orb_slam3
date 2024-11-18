@@ -62,48 +62,4 @@ class Slam{
 		virtual int GetTrackingState() = 0;
 };
 
-class MonoORBSLAM3 : public Slam{
-	public:
-		MonoORBSLAM3(rclcpp::Logger logger);
-		~MonoORBSLAM3(){
-			if(mpORBSlam3){
-				mpORBSlam3->Shutdown();
-			}
-			RCLCPP_INFO(mpLogger, "Destroying Slam3 object");
-		}
-
-		void Shutdown(){
-			if(mpORBSlam3){
-				mpORBSlam3->Shutdown();
-			}
-		}
-		cv::Mat GetCurrentFrame(){
-			if(mpORBSlam3){
-				return mpORBSlam3->GetCurrentFrame();
-			}
-			else{
-				return cv::Mat();
-			}
-		};
-		void TrackMonocular(Frame &frame, Sophus::SE3f &tcw);
-		void InitialiseSlam(std::shared_ptr<custom_interfaces::srv::StartupSlam::Request> request, std::shared_ptr<custom_interfaces::srv::StartupSlam::Response> response);
-	private:
-		// ORBSLAM3 Related pointers
-		std::string mpVocabFilePath = "";
-		std::string mpSettingsFilePath = "";
-		ORB_SLAM3::System::eSensor mpCameraType;
-		std::unique_ptr<ORB_SLAM3::System> mpORBSlam3 = nullptr;
-		
-		int GetTrackingState(){
-			if(mpORBSlam3){
-				return mpORBSlam3->GetTrackingState();
-			}
-			else{
-				return -1;
-			}
-		};
-};
-
-typedef MonoORBSLAM3 MonoORBSLAM3;
-
 #endif

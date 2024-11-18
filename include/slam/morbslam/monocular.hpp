@@ -14,31 +14,31 @@
 #include "std_srvs/srv/trigger.hpp"
 
 #include <cv_bridge/cv_bridge.h>
-// ORB_SLAM3 related includes
-#include"System.h"
-#include"Frame.h"
-#include "Map.h"
-#include "Tracking.h"
-#include "MapPoint.h"
+// MORB_SLAM related includes
+#include <MORB_SLAM/System.h>
+#include <MORB_SLAM/Frame.h>
+#include <MORB_SLAM/Map.h>
+#include <MORB_SLAM/Tracking.h>
+#include <MORB_SLAM/MapPoint.h>
 
-class MonoORBSLAM3 : public Slam{
+class MonoMORBSLAM : public Slam{
 	public:
-		MonoORBSLAM3(rclcpp::Logger logger);
-		~MonoORBSLAM3(){
-			if(mpORBSlam3){
-				mpORBSlam3->Shutdown();
+		MonoMORBSLAM(rclcpp::Logger logger);
+		~MonoMORBSLAM(){
+			if(mpMORBSLAM){
+				mpMORBSLAM->Shutdown();
 			}
 			RCLCPP_INFO(mpLogger, "Destroying Slam3 object");
 		}
 
 		void Shutdown(){
-			if(mpORBSlam3){
-				mpORBSlam3->Shutdown();
+			if(mpMORBSLAM){
+				mpMORBSLAM->Shutdown();
 			}
 		}
 		cv::Mat GetCurrentFrame(){
-			if(mpORBSlam3){
-				return mpORBSlam3->GetCurrentFrame();
+			if(mpMORBSLAM){
+				return mpMORBSLAM->GetCurrentFrame();
 			}
 			else{
 				return cv::Mat();
@@ -51,19 +51,19 @@ class MonoORBSLAM3 : public Slam{
 		std::string mpVocabFilePath = "";
 		std::string mpSettingsFilePath = "";
 		ORB_SLAM3::System::eSensor mpCameraType;
-		std::unique_ptr<ORB_SLAM3::System> mpORBSlam3 = nullptr;
+		std::unique_ptr<ORB_SLAM3::System> mpMORBSLAM = nullptr;
 		
 		int GetTrackingState(){
-			if(mpORBSlam3){
-				return mpORBSlam3->GetTrackingState();
+			if(mpMORBSLAM){
+				return mpMORBSLAM->GetTrackingState();
 			}
 			else{
 				return -1;
 			}
 		};
 };
+typedef MonoMORBSLAM MonoMORBSLAM;
 
-typedef MonoORBSLAM3 MonoORBSLAM3;
 class MonocularSlamNode : public SlamNode
 {
 	public:
