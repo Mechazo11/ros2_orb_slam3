@@ -2,9 +2,6 @@
 
 #include <opencv2/core/core.hpp>
 
-using ImageMsg = sensor_msgs::msg::Image;
-using MarkerMsg = visualization_msgs::msg::Marker;
-using PointMsg = geometry_msgs::msg::Point;
 
 using namespace std;
 
@@ -20,7 +17,7 @@ void MonoMORBSLAM::InitialiseSlam(
 	RCLCPP_INFO(mpLogger, "Initialising MORBSLAM Object");
 	std::string configFilePath = request->config_file_path;		
 	std::string vocabFilePath, settingsFilePath;
-	MORB_SLAM::System::eSensor cameraType;
+	MORB_SLAM::CameraType cameraType;
 	YAML::Node slamConfig;
 	if(readYAMLFile(configFilePath, slamConfig)){
 		RCLCPP_INFO(mpLogger, "successfully read slam config");
@@ -43,7 +40,7 @@ void MonoMORBSLAM::InitialiseSlam(
 			response->message = "Settings file path not found";
 		}
 		if((request->camera_type).compare("monocular") == 0){
-			cameraType = MORB_SLAM::System::eSensor::MONOCULAR;	
+			cameraType = MORB_SLAM::CameraType::MONOCULAR;	
 		}
 		else{
 			response->success = false;
@@ -54,6 +51,8 @@ void MonoMORBSLAM::InitialiseSlam(
 }
 
 void MonoMORBSLAM::TrackMonocular(Frame &frame, Sophus::SE3f &tcw){
-	tcw = mpMORBSLAM->TrackMonocular(frame.getImage(), frame.getTimestampSec());
+	// tcw = 
+	MORB_SLAM::MonoPacket packet = mpMORBSLAM->TrackMonocular(frame.getImage(), frame.getTimestampSec());
+	tcw = *(packet.pose);
 }
 

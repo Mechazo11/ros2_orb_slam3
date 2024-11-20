@@ -2,11 +2,11 @@
 
 MonocularSlamNode::MonocularSlamNode() : SlamNode("orbslam3_mono_node"){
 	RCLCPP_INFO(this->get_logger(), "Creating SLAM Object in Mono Slam Node");
-#ifdef ORBSLAM3
+#ifdef USE_ORBSLAM3
 	mpSlam = std::unique_ptr<Slam>(new MonoORBSLAM3(this->get_logger()));
 	RCLCPP_INFO(this->get_logger(), "Created SLAM Object for ORBSLAM3 in Mono Slam Node");
 #endif
-#ifdef MORBSLAM
+#ifdef USE_MORBSLAM
 	mpSlam = std::unique_ptr<Slam>(new MonoMORBSLAM(this->get_logger()));
 	RCLCPP_INFO(this->get_logger(), "Created SLAM Object for MORBSLAM in Mono Slam Node");
 #endif

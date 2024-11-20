@@ -1,8 +1,9 @@
-#ifdef ORBSLAM3
+#include "slam/node.hpp"
+#ifdef USE_ORBSLAM3
 #include "slam/orbslam3/monocular.hpp"
 #endif
 
-#ifdef  MORBSLAM
+#ifdef  USE_MORBSLAM
 #include "slam/morbslam/monocular.hpp"
 #endif
 

@@ -1,13 +1,4 @@
-/*
-* Originally adapted from ORB-SLAM3: Examples/ROS/src/ros_mono.cc
-* Author: Azmyin Md. Kamal
-* Version: 1.0
-* Date: 01/01/2024
-* Compatible for ROS2 Humble
-*/
-
-//* Import all necessary modules
-#include "slam/orbslam3/monocular.hpp" //* equivalent to orbslam3_ros/include/common.h
+#include "slam/monocular.hpp" //* equivalent to orbslam3_ros/include/common.h
 
 //* main
 int main(int argc, char **argv){
