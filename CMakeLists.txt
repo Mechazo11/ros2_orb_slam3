@@ -152,14 +152,21 @@ install(FILES ${g2o_PATH} DESTINATION lib)
 add_executable(orbslam3_mono_node
 	src/node.cpp
 	src/slam.cpp
+	src/monocular.cpp
 	src/orbslam3/monocular.cpp
-	src/orbslam3/monocular_driver.cpp
+	src/monocular_driver.cpp
 )
+set(USE_ORBLAM3 1)
+target_compile_definitions(orbslam3_mono_node PRIVATE USE_ORBSLAM3=${USE_ORBLAM3})
 add_executable(morbslam_mono_node
 	src/node.cpp
 	src/slam.cpp
+	src/monocular.cpp
 	src/morbslam/monocular.cpp
+	src/monocular_driver.cpp
 )
+set(USE_MORBLAM 1)
+target_compile_definitions(morbslam_mono_node PRIVATE USE_MORBSLAM=${USE_MORBSLAM})
 
 ament_target_dependencies(orbslam3_mono_node
   PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS}
