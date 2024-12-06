@@ -19,7 +19,12 @@ class MonocularSlamNode : public SlamNode
 		std::string mpVocabFilePath;
 		std::unique_ptr<Slam> mpSlam = nullptr;
 		// ORB_SLAM3 related attributes
+#ifdef USE_ORBSLAM3
 		ORB_SLAM3::Tracking::eTrackingState mpState;
+#endif
+#ifdef USE_MORBSLAM
+		MORB_SLAM::TrackingState mpState = MORB_SLAM::TrackingState::SYSTEM_NOT_READY;
+#endif
 		// Image pointer for receiving and passing images to SLAM
 		cv_bridge::CvImagePtr m_cvImPtr;
 		// Publishers, Subscribers, Services and Actions

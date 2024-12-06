@@ -60,5 +60,5 @@ class MonoMORBSLAM : public Slam{
 			// }
 		};
 };
-typedef MonoMORBSLAM MonoMORBSLAM;
+// typedef MonoMORBSLAM MonoMORBSLAM;
 #endif

@@ -63,5 +63,5 @@ class MonoORBSLAM3 : public Slam{
 		};
 };
 
-typedef MonoORBSLAM3 MonoORBSLAM3;
+// typedef MonoORBSLAM3 MonoORBSLAM3;
 #endif

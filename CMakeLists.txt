@@ -44,26 +44,19 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(Yaml-cpp REQUIRED)
 find_package(MORB_SLAM REQUIRED COMPONENTS MORB_SLAM DBoW2 g2o sophus)
+find_package(octomap REQUIRED)
 
 # Header file locations [C++ node]
-include_directories(include) # Add .hpp, .h files from include/ros2_orb_slam3
-include_directories(${EIGEN3_INCLUDE_DIRS}) # Include headers for eigen3
-include_directories(${Pangolin_INCLUDE_DIRS}) # include headers for pangolin
-include_directories(${OpenCV_INCLUDE_DIRS}) # include headers for pangolin
-include_directories(${YAMLCPP_INCLUDE_DIR})
-
-
-# ORB-SLAM3 includes [VSLAM library]
 include_directories(
-  ${PROJECT_SOURCE_DIR}
-  ${PROJECT_SOURCE_DIR}/orb_slam3
-  ${PROJECT_SOURCE_DIR}/orb_slam3/include
-  ${PROJECT_SOURCE_DIR}/orb_slam3/include/CameraModels
-  ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty
-  ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/Sophus
-  ${ament_INCLUDE_DIRS}
-  $<INSTALL_INTERFACE:include>
-)
+	${ament_INCLUDE_DIRS}
+	$<INSTALL_INTERFACE:include>
+	include 
+	${EIGEN3_INCLUDE_DIRS}
+	${Pangolin_INCLUDE_DIRS}
+	${OpenCV_INCLUDE_DIRS}
+	${YAMLCPP_INCLUDE_DIR}
+	${OCTOMAP_INCLUDE_DIRS})
+
 
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -77,9 +70,9 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   # your_custom_msg_interface
   cv_bridge
   image_transport
-  OpenCV
-  Eigen3
-  Pangolin
+  # OpenCV
+  # Eigen3
+  # Pangolin
   custom_interfaces
   tf2
   tf2_ros
@@ -120,11 +113,23 @@ add_library(orb_slam3_lib SHARED
   orb_slam3/src/Settings.cc
 )
 
+# ORB-SLAM3 includes [VSLAM library]
+target_include_directories(
+	orb_slam3_lib
+	PUBLIC ${PROJECT_SOURCE_DIR}
+	PUBLIC ${PROJECT_SOURCE_DIR}/orb_slam3
+	PUBLIC ${PROJECT_SOURCE_DIR}/orb_slam3/include
+	PUBLIC ${PROJECT_SOURCE_DIR}/orb_slam3/include/CameraModels
+	PUBLIC ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty
+	PUBLIC ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/Sophus
+)
+
+
 set_target_properties(orb_slam3_lib PROPERTIES VERSION "${orb_slam3_lib_VERSION}") # TODO need to findout why this is required
 
-ament_target_dependencies(orb_slam3_lib
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
+# ament_target_dependencies(orb_slam3_lib
+#   ${THIS_PACKAGE_INCLUDE_DEPENDS}
+# )
 
 
 # Link libraries
@@ -158,6 +163,15 @@ add_executable(orbslam3_mono_node
 )
 set(USE_ORBLAM3 1)
 target_compile_definitions(orbslam3_mono_node PRIVATE USE_ORBSLAM3=${USE_ORBLAM3})
+target_include_directories(
+	orbslam3_mono_node
+	PUBLIC ${PROJECT_SOURCE_DIR}
+	PUBLIC ${PROJECT_SOURCE_DIR}/orb_slam3
+	PUBLIC ${PROJECT_SOURCE_DIR}/orb_slam3/include
+	PUBLIC ${PROJECT_SOURCE_DIR}/orb_slam3/include/CameraModels
+	PUBLIC ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty
+	PUBLIC ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/Sophus
+)
 add_executable(morbslam_mono_node
 	src/node.cpp
 	src/slam.cpp
@@ -165,6 +179,7 @@ add_executable(morbslam_mono_node
 	src/morbslam/monocular.cpp
 	src/monocular_driver.cpp
 )
+# target_include_directories()
 set(USE_MORBLAM 1)
 target_compile_definitions(morbslam_mono_node PRIVATE USE_MORBSLAM=${USE_MORBSLAM})
 
@@ -185,8 +200,8 @@ target_link_libraries(morbslam_mono_node
 	PUBLIC MORB_SLAM::g2o
 	PUBLIC MORB_SLAM::sophus
   	PUBLIC ${YAMLCPP_LIBRARY}
-	PUBLIC yaml-cpp)
-
+	PUBLIC yaml-cpp
+	PUBLIC ${OCTOMAP_LIBRARIES})
 
 # Install all the header files in package/package/include
 install (DIRECTORY include/ 

@@ -31,7 +31,12 @@ void MonocularSlamNode::InitialiseSlamNode(std::shared_ptr<StartupSlam::Request>
 	// mpMapPublisher = this->create_publisher<MarkerMsg>("~/slam_map");
 	mpSlam->InitialiseSlam(request, response);
 
+#ifdef USE_ORBSLAM3
 	mpState = ORB_SLAM3::Tracking::SYSTEM_NOT_READY;
+#endif
+#ifdef USE_MORBSLAM
+	mpState = MORB_SLAM::TrackingState::SYSTEM_NOT_READY;
+#endif
 	if(!response->success){
 		response->success = true;
 		response->message = "Successfully created SLAM object and required subscribers";

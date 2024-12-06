@@ -2,8 +2,6 @@
 #define SLAM_OBJECT_HPP
 
 // ORBSLAM3 Dependencies
-#include"System.h"
-#include "Map.h"
 #include <opencv2/core/core.hpp>
 #include <memory>
 #include <thread>
@@ -14,6 +12,7 @@
 #include <filesystem>
 #include <string>
 #include "rclcpp/rclcpp.hpp"
+#include <sophus/se3.hpp>
 
 using StartupSlam = custom_interfaces::srv::StartupSlam;
 using ShutdownSlam = std_srvs::srv::Trigger;
