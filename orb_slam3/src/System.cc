@@ -193,6 +193,8 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     // mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR
     mpLoopCloser = new LoopClosing(mpAtlas, mpKeyFrameDatabase, mpVocabulary, mSensor!=MONOCULAR, activeLC); // mSensor!=MONOCULAR);
     mptLoopClosing = new thread(&ORB_SLAM3::LoopClosing::Run, mpLoopCloser);
+	
+	mpOctoMapBuilder = new OctoMapBuilder();
 
     //Set pointers between threads
     mpTracker->SetLocalMapper(mpLocalMapper);
@@ -375,6 +377,7 @@ Sophus::SE3f System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const
     mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
     mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
     mTrackedKeyPoints = mpTracker->mCurrentFrame.mvKeys;
+	FrameMapPointUpdateCallback(mTrackedMapPoints, Tcw);
 
     return Tcw;
 }
@@ -1621,6 +1624,18 @@ bool System::SaveMap(const string &filename)
         return SaveAtlas(FileType::BINARY_FILE);
     }
     return false;
+}
+
+void System::FrameMapPointUpdateCallback(std::vector<MapPoint*> &mapPoints, const Sophus::SE3<float> &tcw){
+	mpOctoMapBuilder->FrameMapPointUpdateCallback(mapPoints, tcw);
+}
+
+void System::FrameMapPointUpdateCallback(std::set<MapPoint*> &mapPoints, const Sophus::SE3<float> &tcw){
+	mpOctoMapBuilder->FrameMapPointUpdateCallback(mapPoints, tcw);
+}
+
+void System::SetFrameMapPointUpdateCallback(std::function<void(std::vector<MapPoint*>&, const Sophus::SE3<float>&)> frameUpdateCallback){
+	mpOctoMapBuilder->SetFrameMapPointUpdateCallback(frameUpdateCallback);
 }
 
 } //namespace ORB_SLAM

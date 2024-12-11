@@ -89,6 +89,7 @@ add_library(orb_slam3_lib SHARED
   orb_slam3/src/LoopClosing.cc
   orb_slam3/src/ORBextractor.cc
   orb_slam3/src/ORBmatcher.cc
+  orb_slam3/src/OctoMapBuilder.cpp
   orb_slam3/src/FrameDrawer.cc
   orb_slam3/src/Converter.cc
   orb_slam3/src/MapPoint.cc
