@@ -46,6 +46,8 @@ class MonoORBSLAM3 : public Slam{
 		};
 		void TrackMonocular(Frame &frame, Sophus::SE3f &tcw);
 		void InitialiseSlam(std::shared_ptr<custom_interfaces::srv::StartupSlam::Request> request, std::shared_ptr<custom_interfaces::srv::StartupSlam::Response> response);
+		void SetFrameMapPointUpdateCallback(std::function<void(std::vector<ORB_SLAM3::MapPoint*>&, const Sophus::SE3<float>&)> callback);
+
 	private:
 		// ORBSLAM3 Related pointers
 		std::string mpVocabFilePath = "";

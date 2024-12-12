@@ -28,10 +28,15 @@ void MonocularSlamNode::InitialiseSlamNode(std::shared_ptr<StartupSlam::Request>
 			10,
 			std::bind(&MonocularSlamNode::GrabImage, this, std::placeholders::_1));
 	mpAnnotatedFramePublisher = this->create_publisher<ImageMsg>("~/annotated_frame", 10);
+	mpMapPointPublisher = this->create_publisher<MapMsg>("~/map_points", 10);
 	// mpMapPublisher = this->create_publisher<MarkerMsg>("~/slam_map");
 	mpSlam->InitialiseSlam(request, response);
 
 #ifdef USE_ORBSLAM3
+	std::function<void(std::vector<ORB_SLAM3::MapPoint*>&, const Sophus::SE3<float>&)> cb = [this](std::vector<ORB_SLAM3::MapPoint*> &mapPoints, const Sophus::SE3<float> &tcw){
+		PublishMapPointsCallback(mapPoints, tcw);
+	};
+	mpSlam->SetFrameMapPointUpdateCallback(cb);
 	mpState = ORB_SLAM3::Tracking::SYSTEM_NOT_READY;
 #endif
 #ifdef USE_MORBSLAM
@@ -82,9 +87,9 @@ void MonocularSlamNode::GrabImage(const ImageMsg::SharedPtr msg)
 	int sec = msg->header.stamp.sec;
 	int nsec = msg->header.stamp.nanosec;
 	long timestamp = sec * 1e9 + nsec;
-   	Frame frame = Frame(std::make_shared<cv::Mat>(m_cvImPtr->image), timestamp);
+   	mpCurrentFrame = Frame(std::make_shared<cv::Mat>(m_cvImPtr->image), timestamp);
 	Sophus::SE3f tcw;
-	mpSlam->TrackMonocular(frame, tcw);
+	mpSlam->TrackMonocular(mpCurrentFrame, tcw);
 	// The output of ORBSLAM3 is the transformation that can convert points
 	// from world frame to camera frame. Thus, Tcw * Xw would be equivalent to
 	// Xw to Xc. To get the position of the camera with respect to slam origin,
@@ -133,3 +138,70 @@ void MonocularSlamNode::PublishFrame()
     mpAnnotatedFramePublisher->publish(std::move(img_msg_ptr));
 
 }
+
+#ifdef USE_ORBSLAM3
+void MonocularSlamNode::PublishMapPointsCallback(std::vector<ORB_SLAM3::MapPoint*> &mapPoints, const Sophus::SE3<float> &tcw){
+	if(mapPoints.size() == 0){
+		RCLCPP_ERROR(this->get_logger(), "No Map Points to add to octomap");
+		return;
+	}
+	MapMsg msg = MapPointsToPointCloud(mapPoints, tcw);
+	mpMapPointPublisher->publish(msg);
+}
+
+MapMsg MonocularSlamNode::MapPointsToPointCloud (std::vector<ORB_SLAM3::MapPoint*> &mapPoints, const Sophus::SE3<float> &tcw){
+    MapMsg cloud;
+
+    const int num_channels = 3; // x y z
+	long current_frame_time_ = mpCurrentFrame.getTimestampNSec();
+	Eigen::Matrix3d cam_base_R_ = tcw.so3().matrix().cast<double>();
+	Eigen::Vector3d cam_base_T_ = tcw.translation().cast<double>();
+
+    cloud.header.stamp.sec = static_cast<int32_t>(current_frame_time_ / 1e9);
+	cloud.header.stamp.nanosec = static_cast<int32_t>(current_frame_time_ % static_cast<long long>(1e9));
+    cloud.header.frame_id = "map";
+    cloud.height = 1;
+    cloud.width = mapPoints.size();
+    cloud.is_bigendian = false;
+    cloud.is_dense = true;
+    cloud.point_step = num_channels * sizeof(float);
+    cloud.row_step = cloud.point_step * cloud.width;
+    cloud.fields.resize(num_channels);
+
+    std::string channel_id[] = { "x", "y", "z"};
+    for (int i = 0; i<num_channels; i++) {
+        cloud.fields[i].name = channel_id[i];
+        cloud.fields[i].offset = i * sizeof(float);
+        cloud.fields[i].count = 1;
+        cloud.fields[i].datatype = sensor_msgs::msg::PointField::FLOAT32;
+    }
+
+    cloud.data.resize(cloud.row_step * cloud.height);
+
+    unsigned char *cloud_data_ptr = &(cloud.data[0]);
+
+    float data_array[num_channels];
+    for (unsigned int i=0; i<cloud.width; i++) {
+        if(!mapPoints[i])
+            continue;
+
+        if (mapPoints.at(i)->nObs >= mpNumMinObsPerPoint) {
+            Eigen::Vector3f map_pt_f = mapPoints.at(i)->GetWorldPos();
+
+            Eigen::Vector3d map_pt = map_pt_f.cast<double>();
+
+            map_pt = cam_base_R_ * map_pt;
+            map_pt += cam_base_T_;
+
+            data_array[0] = map_pt[0];
+            data_array[1] = map_pt[1];
+            data_array[2] = map_pt[2];
+
+            memcpy(cloud_data_ptr + (i * cloud.point_step), data_array, num_channels * sizeof(float));
+        }
+    }
+
+    return cloud;
+}
+
+#endif

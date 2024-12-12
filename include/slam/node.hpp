@@ -3,6 +3,7 @@
 
 #include "slam/slam.hpp"
 #include "sensor_msgs/msg/image.hpp"
+#include "sensor_msgs/msg/point_cloud2.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 #include "std_srvs/srv/trigger.hpp"
 #include "tf2_ros/transform_broadcaster.h"
@@ -13,6 +14,7 @@
 using ImageMsg = sensor_msgs::msg::Image;
 using MarkerMsg = visualization_msgs::msg::Marker;
 using PointMsg = geometry_msgs::msg::Point;
+using MapMsg = sensor_msgs::msg::PointCloud2;
 
 bool readYAMLFile(std::string &yamlPath, YAML::Node &output);
 

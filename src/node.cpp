@@ -30,7 +30,7 @@ void SlamNode::PublishPositionAsTransform(Sophus::SE3f &tcw){
 	// Get transform from slam to camera frame as a message
 	geometry_msgs::msg::TransformStamped msg;
 	msg.header.stamp = this->get_clock()->now();
-	msg.header.frame_id = "slam";
+	msg.header.frame_id = "map";
 	msg.child_frame_id = "camera";
 	msg.transform  = sophusToTransformMsg(tcw); 
 	// Broadcast tf                                                       
