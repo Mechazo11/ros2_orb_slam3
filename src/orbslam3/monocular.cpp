@@ -57,3 +57,7 @@ void MonoORBSLAM3::TrackMonocular(Frame &frame, Sophus::SE3f &tcw){
 	tcw = mpORBSlam3->TrackMonocular(frame.getImage(), frame.getTimestampSec());
 }
 
+
+void MonoORBSLAM3::SetFrameMapPointUpdateCallback(std::function<void(std::vector<ORB_SLAM3::MapPoint*>&, const Sophus::SE3<float>&)> callback){
+	mpORBSlam3->SetFrameMapPointUpdateCallback(callback);
+}

@@ -39,6 +39,7 @@
 #include "Viewer.h"
 #include "ImuTypes.h"
 #include "Settings.h"
+#include "OctoMapBuilder.h"
 
 
 namespace ORB_SLAM3
@@ -237,6 +238,10 @@ private:
     // a pose graph optimization and full bundle adjustment (in a new thread) afterwards.
     LoopClosing* mpLoopCloser;
 
+	// OctoMapBuilder to update octomap object for planning
+	// Current function of the class is to serve as a communication interface for ROS2
+	OctoMapBuilder* mpOctoMapBuilder;
+
     // The viewer draws the map and the current camera pose. It uses Pangolin.
     Viewer* mpViewer;
 
@@ -276,6 +281,12 @@ private:
     string mStrVocabularyFilePath;
 
     Settings* settings_;
+
+public:
+	void FrameMapPointUpdateCallback(std::vector<MapPoint*> &mapPoints, const Sophus::SE3<float> &tcw);
+	void FrameMapPointUpdateCallback(std::set<MapPoint*> &mapPoints, const Sophus::SE3<float> &tcw);
+	void SetFrameMapPointUpdateCallback(std::function<void(std::vector<MapPoint*>&, const Sophus::SE3<float>&)> frameUpdateCallback);
+
 };
 
 }// namespace ORB_SLAM

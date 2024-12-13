@@ -126,6 +126,7 @@ void LocalMapping::Run()
                 if(mpAtlas->KeyFramesInMap()>2)
                 {
 
+					std::vector<KeyFrame*> vOptimizedKFs;
                     if(mbInertial && mpCurrentKeyFrame->GetMap()->isImuInitialized())
                     {
                         float dist = (mpCurrentKeyFrame->mPrevKF->GetCameraCenter() - mpCurrentKeyFrame->GetCameraCenter()).norm() +
@@ -151,9 +152,19 @@ void LocalMapping::Run()
                     }
                     else
                     {
+						std::vector<KeyFrame*> vCovisibleKFs = mpCurrentKeyFrame->GetVectorCovisibleKeyFrames();
+						for(std::vector<KeyFrame*>::iterator kf_it = vCovisibleKFs.begin(); kf_it < vCovisibleKFs.end(); kf_it++){
+							if(!(*kf_it)->isBad() && (*kf_it)->GetMap() == mpCurrentKeyFrame->GetMap()){
+								vOptimizedKFs.push_back(*kf_it);
+							}
+						}
                         Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpCurrentKeyFrame->GetMap(),num_FixedKF_BA,num_OptKF_BA,num_MPs_BA,num_edges_BA);
                         b_doneLBA = true;
                     }
+					for(std::vector<KeyFrame*>::iterator it = vOptimizedKFs.begin(); it < vOptimizedKFs.end(); it++){
+						std::set<MapPoint*> vMapPoints = (*it)->GetMapPoints();
+						mpSystem->FrameMapPointUpdateCallback(vMapPoints, (*it)->GetPose());
+					}
 
                 }
 #ifdef REGISTER_TIMES
