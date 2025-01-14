@@ -287,6 +287,8 @@ public:
 	void FrameMapPointUpdateCallback(std::set<MapPoint*> &mapPoints, const Sophus::SE3<float> &tcw);
 	void SetFrameMapPointUpdateCallback(std::function<void(std::vector<MapPoint*>&, const Sophus::SE3<float>&)> frameUpdateCallback);
 
+    void GlobalMPAndKFPosesCallback(std::vector<std::pair<std::vector<MapPoint*>&, const Sophus::SE3<float>&>> &globalMPAndKFPoses);
+    void SetGlobalMPAndKFPosesCallback(std::function<void(std::vector<std::pair<std::vector<MapPoint*>&, const Sophus::SE3<float>&>>)> globalMPAndKFPosesCallback);
 };
 
 }// namespace ORB_SLAM

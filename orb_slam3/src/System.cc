@@ -1638,5 +1638,13 @@ void System::SetFrameMapPointUpdateCallback(std::function<void(std::vector<MapPo
 	mpOctoMapBuilder->SetFrameMapPointUpdateCallback(frameUpdateCallback);
 }
 
+void System::GlobalMPAndKFPosesCallback(std::vector<std::pair<std::vector<MapPoint*>&, const Sophus::SE3<float>&>> &globalMPAndKFPoses){
+	mpOctoMapBuilder->GlobalMPAndKFPosesCallback(globalMPAndKFPoses);
+}
+
+void System::SetGlobalMPAndKFPosesCallback(std::function<void(std::vector<std::pair<std::vector<MapPoint*>&, const Sophus::SE3<float>&>>)> globalMapPointCallback){
+    mpOctoMapBuilder->SetGlobalMPAndKFPosesCallback(globalMapPointCallback);
+}
+
 } //namespace ORB_SLAM
 

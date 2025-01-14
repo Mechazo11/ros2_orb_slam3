@@ -118,6 +118,9 @@ public:
 
 protected:
 
+    
+    System *mpSystem;
+
     bool CheckNewKeyFrames();
 
 

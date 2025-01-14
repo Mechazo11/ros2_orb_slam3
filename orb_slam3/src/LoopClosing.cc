@@ -2485,6 +2485,20 @@ void LoopClosing::RunGlobalBundleAdjustment(Map* pActiveMap, unsigned long nLoop
                 }
             }
 
+            const vector<KeyFrame*> vpKFs =  pActiveMap->GetAllKeyFrames();
+
+            std::vector<std::pair<std::vector<MapPoint*>&, const Sophus::SE3<float>&>> GlobalMPAndKFPoses;
+
+            for(std::vector<KeyFrame*>::const_iterator kf_it = vpKFs.begin();kf_it< vpKFs.end();kf_it++){
+
+                std::set<MapPoint*> SetMapPoints = (*kf_it)->GetMapPoints();
+                std::vector<MapPoint*> GlobalMapPoints(SetMapPoints.begin(), SetMapPoints.end());
+                std::pair<std::vector<MapPoint*>&, const Sophus::SE3<float>&> MapPointAndKFPose(GlobalMapPoints,(*kf_it)->GetPose());
+                GlobalMPAndKFPoses.push_back(MapPointAndKFPose);
+            }
+
+            mpSystem->GlobalMPAndKFPosesCallback(GlobalMPAndKFPoses);
+
             pActiveMap->InformNewBigChange();
             pActiveMap->IncreaseChangeIndex();
 

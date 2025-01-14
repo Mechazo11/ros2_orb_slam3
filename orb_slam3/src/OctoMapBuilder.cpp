@@ -17,4 +17,14 @@ void OctoMapBuilder::FrameMapPointUpdateCallback(std::set<MapPoint*> &mapPoints,
 	std::vector<MapPoint*> vMapPoints(mapPoints.begin(), mapPoints.end());
 	mpFrameMapPointUpdateCallback(vMapPoints, tcw);
 }
+
+void OctoMapBuilder::SetGlobalMPAndKFPosesCallback(std::function<void(std::vector<std::pair<std::vector<MapPoint*>&, const Sophus::SE3<float>&>>)> globalMPAndKFPosesCallback){
+	mpGlobalMPAndKFPosesCallback = globalMPAndKFPosesCallback;
+}
+
+void OctoMapBuilder::GlobalMPAndKFPosesCallback(std::vector<std::pair<std::vector<MapPoint*>&, const Sophus::SE3<float>&>> &globalMPAndKFPoses){
+	mpGlobalMPAndKFPosesCallback(globalMPAndKFPoses);
+}
+
+
 }
