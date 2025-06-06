@@ -156,17 +156,10 @@ Both nodes would perform a handshake and the VSLAM framework would then work as 
 https://github.com/Mechazo11/ros2_orb_slam3/assets/44814419/af9eaa79-da4b-4405-a4d7-e09242ab9660
 
 
-Thank you for taking the time in checking this project out. I hope it helps you out. If you find this package useful in your project consider citing the original ORB SLAM3 paper and one of my recent papers shown below
+Thank you for taking the time in checking this project out. I hope it helps you out. If you find this package useful in your project consider citing the papers mentioned above
 
 ## TODO next version:
 
 - [ ] Stereo mode example
 - [ ] RGBD mode example
-
-## TODO done
-
-- [ ] Release `version 0.5`
-- [x] Finish working example and upload code
-- [x] Detailed installation and usage instructions
-- [x] Show short video example for monocular mode
-- [x] Update bibtex to use my IEEE AIM 2024 paper from google scholar
+- [ ] Detailed build instructions for `aarch64` based computers i.e. Orin Nano, Raspberry Pi etc.
