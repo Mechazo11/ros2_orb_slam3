@@ -1,4 +1,7 @@
-set(g2o_SOURCE_DIR "${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/g2o")
+cmake_minimum_required(VERSION 3.10)
+# set(g2o_SOURCE_DIR "${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/g2o")
+set(g2o_SOURCE_DIR "${PROJECT_SOURCE_DIR}")
+
 
 SET(g2o_C_FLAGS)
 SET(g2o_CXX_FLAGS)

@@ -1,6 +1,6 @@
 ![License](https://img.shields.io/badge/License-GPLv3-blue.svg)
 ![Build Status](https://img.shields.io/badge/Build-Passing-success.svg)
-![ROS2](https://img.shields.io/badge/ROS2-Humble-blue.svg)
+![ROS2](https://img.shields.io/badge/ROS2-Jazzy-purple.svg)
 ![Version](https://img.shields.io/badge/Version-1.5.0-blue.svg)
 
 # ROS2 ORB SLAM3 V1.0 package 
@@ -144,19 +144,39 @@ source /opt/ros/<ROS-DISTRO>/setup.bash
 sudo apt-get install ros-<ROS-DISTRO>-cv-bridge 
 ```
 
+#### Create symbolic link to OpenCV 4.6 (or a later version installed)
+
+As of June 2025, it appears the `.so` objects for `g2o` library was compiled against OpenCV 4.5d which is absent in Ubuntu 24.04 Humble. This error is seen without creating a symbolic link
+
+```bash
+ros2 run ros2_orb_slam3 mono_node_cpp --ros-args -p node_name_arg:=mono_slam_cpp
+/home/az-ubuntu-2204/ros2_ws/install/ros2_orb_slam3/lib/ros2_orb_slam3/mono_node_cpp: error while loading shared libraries: libopencv_core.so.4.5d: cannot open shared object file: No such file or directory
+```
+
+To circumvent this problem, create a symbolic link to `libopencv_core.so.4.6`
+
+```bash
+sudo ln -s /lib/x86_64-linux-gnu/libopencv_core.so.406 /lib/x86_64-linux-gnu/libopencv_core.so.4.5d
+```
+
+NOTE 1: The above only persists until system is rebooted, I leave it to the user to decide on a more `permanent` approach then the one shown above.
+
+NOTE 2: A permanent solution to the above is recompiling `g2o` library. I had made some changes to the `CmakeLists.txt` file for the `g2o` package shipped in the `Thirdparty` directory but it needs more work. Please open a Pull Request if you figure out how to rebuild `g2o` to link against OpenCV version available in a system (should be agnostic to Ubuntu 22.04 / Ubuntu 24.04 i.e. works with the installed version of OpenCV present in the system).
+
 
 ## 2. Installation
 
-Follow the steps below to create the ```ros2_test``` workspace, install dependencies and build the package. Note, the workspace must be named ```ros2_test``` due to a HARDCODED path in the python node. I leave it to the developers to change this behavior as they see fit.
+Follow the steps below to create the ```ros2_ws``` workspace, install dependencies and build the package. Note, the workspace must be named ```ros2_ws``` due to a `HARDCODED` path in the `MonoDriver` class in the `mono_driver_node.py` script and path to the config YAML file. I leave it to the developers to change this behavior as they see fit.
 
 ```bash
 cd ~
-mkdir -p ~/ros2_test/src
-cd ~/ros2_test/src
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/src
 git clone https://github.com/Mechazo11/ros2_orb_slam3.git
 cd .. # make sure you are in ~/ros2_ws root directory
-rosdep install -r --from-paths src --ignore-src -y --rosdistro humble
-source /opt/ros/humble/setup.bash
+rosdep update
+rosdep install -r --from-paths src --ignore-src -y --rosdistro <ROS-DISTRO>
+source /opt/ros/<ROS-DISTRO>/setup.bash
 colcon build --symlink-install
 ```
 
@@ -174,7 +194,7 @@ ros2 run ros2_orb_slam3 mono_node_cpp --ros-args -p node_name_arg:=mono_slam_cpp
 In another terminal [python node]
 
 ```bash
-cd ~/ros2_ws
+cd ~/ros2_ws/
 source ./install/setup.bash
 ros2 run ros2_orb_slam3 mono_driver_node.py --ros-args -p settings_name:=EuRoC -p image_seq:=sample_euroc_MH05
 ```
