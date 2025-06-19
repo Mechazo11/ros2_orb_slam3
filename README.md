@@ -38,15 +38,20 @@ If you find this work useful please consider citing the original ORB-SLAM3 paper
 
 ## 0. Preamble
 
-* This package builds [ORB-SLAM3](https://github.com/UZ-SLAMLab/ORB_SLAM3) V1.0 as a shared internal library. Comes included with a number of Thirdparty libraries [DBoW2, g2o, Sophus]
-* g2o used is an older version and is incompatible with the latest release found here [g2o github page](https://github.com/RainerKuemmerle/g2o).
-* This package differs from other ROS1 wrappers, thien94`s ROS 1 port and ROS 2 wrappers in GitHub by supprting/adopting the following
+This package builds [ORB-SLAM3](https://github.com/UZ-SLAMLab/ORB_SLAM3) `V1.0` as a shared internal library. Comes included with a number of Thirdparty libraries [DBoW2, g2o, Sophus]
+
+`g2o` used packaged with `ORB-SLAM3` is a much older version and is incompatible with the latest release found here [g2o github page](https://github.com/RainerKuemmerle/g2o). If you are willing to make the forward port, please open a Ticket in this repository.
+
+This package differs from other ROS1 wrappers, `thien94`s ROS 1 port and ROS 2 wrappers in GitHub by supprting/adopting the following
   * A separate python node to send data to the ORB-SLAM3 cpp node. This is purely a design choice.
-  * At least C++17 and Cmake>=3.8
-  * Eigen 3.3.0, OpenCV 4.2, latest release of Pangolin
-* Comes with a small test image sequence from EuRoC MAV dataset (MH05) to quickly test installation
-* For newcomers in ROS2 ecosystem, this package serves as an example of building a shared cpp library and also a package with both cpp and python nodes.
-* May not build or work correctly in **resource constrainted hardwares** such as Raspberry Pi 4, Jetson Nano
+  * C++17 and Cmake>=3.8
+  * Eigen 3.3.0, OpenCV>= 4.2, 
+  * Latest version of Pangolin
+  * Comes with a small test image sequence from EuRoC MAV dataset (MH05) to quickly test installation
+
+For newcomers into the ROS 2 ecosystem, this package serves as an example of `building a shared cpp library` and also `a package with both cpp and python nodes`.
+
+* In **resource constrainted hardwares** such as Raspberry Pi 4, Jetson Nano Orin, you need to extend `SWAP` space to at least `16Gb`. 
 
 ## Testing platforms
 
@@ -82,20 +87,28 @@ sudo cmake --install build
 
 #### Configure dynamic library
 
-Check if ```/usr/lib/local``` is in the LIBRARY PATH
+`LD_LIBRARY_PATH` is an environment variable that tells the dynamic linker where to search for shared libraries (.so files) at runtime. First we check if ```/usr/lib/local``` is available in `LD_LIBRARY_PATH`.
 
 ```bash
 echo $LD_LIBRARY_PATH
 ```
 
-If not, then perform the following 
+If you see no output as shown below 
+
+```bash
+/opt/ros/jazzy/opt/gz_sim_vendor/lib:.....:/usr/lib/local
+```
+
+then `/usr/local/lib` is currently not in the `LD_LIBRARY_PATH` add it as shown below 
 
 ```bash
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/local
 sudo ldconfig
 ```
 
-Then open the ```.bashrc``` file in ```\home``` directory and add these lines at the very end
+##### Optional Step: Add /usr/local/lib permanently by modifying .bashrc
+
+Open the ```.bashrc``` file in ```\home``` directory and add these lines at the very end
 
 ```bash
 if [[ ":$LD_LIBRARY_PATH:" != *":/usr/local/lib:"* ]]; then
@@ -109,12 +122,28 @@ Finally, source ```.bashrc``` file
 source ~/.bashrc
 ```
  
-### OpenCV
-Ubuntu 22.04 by default comes with >OpenCV 4.2. Check to make sure you have at least 4.2 installed. Run the following in a terminal
+#### OpenCV
+By default both Ubuntu 22.04 and Ubuntu 24.04 comes with >OpenCV 4.2. Check to make sure you have at least 4.2 installed. Run the following in a terminal
 
 ```bash
 python3 -c "import cv2; print(cv2.__version__)" 
 ```
+
+#### cv_brdige
+
+Check to ensure `cv_bridge` package is installed in the `BASE WORKSPACE` i.e. `/ros/opt/<ROS-DISTRO>`. Try the following
+
+```bash
+ros2 pkg list | grep cv_bridge
+```
+
+If the string `cv_brdige` did not show up, install it as shown bellow
+
+```bash
+source /opt/ros/<ROS-DISTRO>/setup.bash
+sudo apt-get install ros-<ROS-DISTRO>-cv-bridge 
+```
+
 
 ## 2. Installation
 
