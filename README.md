@@ -1,11 +1,13 @@
 ![License](https://img.shields.io/badge/License-GPLv3-blue.svg)
 ![Build Status](https://img.shields.io/badge/Build-Passing-success.svg)
 ![ROS2](https://img.shields.io/badge/ROS2-Jazzy-purple.svg)
-![Version](https://img.shields.io/badge/Version-1.5.0-blue.svg)
+![Version](https://img.shields.io/badge/Version-2.0.0-blue.svg)
 
 # ROS2 ORB SLAM3 V1.0 package 
 
-A ROS2 package for ORB SLAM3 V1.0. Focus is on native integration with ROS2 ecosystem. My goal is to provide a "bare-bones" starting point for developers in using ORB SLAM3 framework in their ROS 2 projects. Hence, this package will not use more advanced features of ROS 2 such as rviz, tf and launch files. This project structure is heavily influenced by the excellent ROS1 port of ORB SLAM3 by [thien94](https://github.com/thien94/orb_slam3_ros/tree/master). 
+A ROS2 package for ORB SLAM3 V1.0. Focus is on native integration with ROS2 ecosystem. This is version `2.0.0` that is built and tested to be compatible with ROS 2 Jazzy. Due to some dependency and workarounds, **this version is not compatible with ROS 2 Humble**. See the `main` / Version `1.5.0` branch for a ROS 2 Humble compatible version
+
+My goal is to provide a "bare-bones" starting point for developers in using ORB SLAM3 framework in their ROS 2 projects. Hence, this package will not use more advanced features of ROS 2 such as rviz, tf and launch files. This project structure is heavily influenced by the excellent ROS1 port of ORB SLAM3 by [thien94](https://github.com/thien94/orb_slam3_ros/tree/master). 
 
 If you find this work useful please consider citing the original ORB-SLAM3 paper and my recent paper that uses this package in solving short-term relocalization (kidnapped robot problem) as shown below
 
@@ -159,7 +161,7 @@ To circumvent this problem, create a symbolic link to `libopencv_core.so.4.6`
 sudo ln -s /lib/x86_64-linux-gnu/libopencv_core.so.406 /lib/x86_64-linux-gnu/libopencv_core.so.4.5d
 ```
 
-NOTE 1: The above only persists until system is rebooted, I leave it to the user to decide on a more `permanent` approach then the one shown above.
+NOTE 1: The above only persists until system is rebooted, I leave it to the user to decide on a more `permanent` approach then the one shown above. In my testing, this setting appears to be persist beyond one system reboot.
 
 NOTE 2: A permanent solution to the above is recompiling `g2o` library. I had made some changes to the `CmakeLists.txt` file for the `g2o` package shipped in the `Thirdparty` directory but it needs more work. Please open a Pull Request if you figure out how to rebuild `g2o` to link against OpenCV version available in a system (should be agnostic to Ubuntu 22.04 / Ubuntu 24.04 i.e. works with the installed version of OpenCV present in the system).
 
