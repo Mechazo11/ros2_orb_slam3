@@ -1,13 +1,13 @@
 ![License](https://img.shields.io/badge/License-GPLv3-blue.svg)
 ![Build Status](https://img.shields.io/badge/Build-Passing-success.svg)
 ![ROS2](https://img.shields.io/badge/ROS2-Humble-blue.svg)
-![Version](https://img.shields.io/badge/Version-1.5.0-blue.svg)
+![Version](https://img.shields.io/badge/Version-2.0.0-blue.svg)
 
 # ROS2 ORB SLAM3 V1.0 package 
 
-A ROS2 package for ORB SLAM3 V1.0. Focus is on native integration with ROS2 ecosystem. My goal is to provide a "bare-bones" starting point for developers in using ORB SLAM3 framework in their ROS 2 projects. This is the `main/humble` branch which only supports ROS 2 Humble. Switch over to `jazzy` branch to use with ROS 2 Jazzy.
+A ROS2 package for ORB SLAM3 V1.0. Focus is on native integration with ROS2 ecosystem. This is the `main/humble` branch which only supports ROS 2 Humble. Switch over to `jazzy` branch to use with ROS 2 Jazzy.
 
-Hence, this package will not use more advanced features of ROS 2 such as rviz, tf and launch files. This project structure is heavily influenced by the excellent ROS1 port of ORB SLAM3 by [thien94](https://github.com/thien94/orb_slam3_ros/tree/master). 
+My goal is to provide a "bare-bones" starting point for developers in using ORB SLAM3 framework in their ROS 2 projects. Hence, this package will not use any advanced features of ROS 2 such as rviz, tf, launch files etc. The project structure is heavily influenced by the excellent ROS1 port of ORB SLAM3 by [thien94](https://github.com/thien94/orb_slam3_ros/tree/master). 
 
 If you find this work useful please consider citing the original ORB-SLAM3 paper and my recent paper that uses this package in solving short-term relocalization (kidnapped robot problem) as shown below
 
