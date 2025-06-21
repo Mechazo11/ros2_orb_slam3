@@ -5,7 +5,7 @@
 
 # ROS2 ORB SLAM3 V1.0 package 
 
-A ROS2 package for ORB SLAM3 V1.0. Focus is on native integration with ROS2 ecosystem. This is version `2.0.0` that is built and tested to be compatible with ROS 2 Jazzy. Due to some dependency and workarounds, **this version is not compatible with ROS 2 Humble**. See the `main` / Version `1.5.0` branch for a ROS 2 Humble compatible version
+A ROS2 package for ORB SLAM3 V1.0. Focus is on native integration with ROS2 ecosystem. This is version `2.0.0` that is built and tested to be compatible with ROS 2 Jazzy. Due to some dependency and workarounds, **this version is not compatible with ROS 2 Humble**. Switch to the `main` branch for a ROS 2 Humble compatible version
 
 My goal is to provide a "bare-bones" starting point for developers in using ORB SLAM3 framework in their ROS 2 projects. Hence, this package will not use more advanced features of ROS 2 such as rviz, tf and launch files. This project structure is heavily influenced by the excellent ROS1 port of ORB SLAM3 by [thien94](https://github.com/thien94/orb_slam3_ros/tree/master). 
 
