@@ -1,3 +1,6 @@
 README.md
 *.mp4
 .vscode/
+
+# ignore colcon log files from build
+log/
