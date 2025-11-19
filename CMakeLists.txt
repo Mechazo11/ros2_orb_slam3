@@ -26,13 +26,14 @@ find_package(Eigen3 3.3.0 REQUIRED) # Matched with Sophus
 find_package(Pangolin REQUIRED)
 find_package(image_transport REQUIRED)
 
-
 # Header file locations [C++ node]
 include_directories(include) # Add .hpp, .h files from include/ros2_orb_slam3
 include_directories(${EIGEN3_INCLUDE_DIRS}) # Include headers for eigen3
 include_directories(${Pangolin_INCLUDE_DIRS}) # include headers for pangolin
 include_directories(${OpenCV_INCLUDE_DIRS}) # include headers for pangolin
 
+add_subdirectory(orb_slam3/Thirdparty/DBoW2)
+add_subdirectory(orb_slam3/Thirdparty/g2o)
 
 # ORB-SLAM3 includes [VSLAM library]
 include_directories(
@@ -42,6 +43,8 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/orb_slam3/include/CameraModels
   ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty
   ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/Sophus
+  ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/DBoW2
+  ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/g2o
   ${ament_INCLUDE_DIRS}
 )
 
@@ -134,21 +137,12 @@ target_link_libraries(orb_slam3_lib
   ${OpenCV_LIBS}
   ${EIGEN3_LIBS}
   ${Pangolin_LIBRARIES}
-  ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/DBoW2/lib/libDBoW2.so
-  ${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/g2o/lib/libg2o.so
+  DBoW2
+  g2o
   -lboost_system
   -lboost_serialization
   -lcrypto 
 )
-
-
-# Find the .so files provided in ros2_orb_slam3/orb_slam3/Thirdparty projects
-set(DBoW2_PATH "${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/DBoW2/lib/libDBoW2.so")
-set(g2o_PATH "${PROJECT_SOURCE_DIR}/orb_slam3/Thirdparty/g2o/lib/libg2o.so")
-
-# Install .so files to the lib directory in the install space
-install(FILES ${DBoW2_PATH} DESTINATION lib)
-install(FILES ${g2o_PATH} DESTINATION lib)
 
 
 # Add executable
@@ -169,8 +163,17 @@ install (DIRECTORY include/
         DESTINATION include
 )
 
+install(DIRECTORY 
+  config
+  dist
+  launch
+  node_modules
+  DESTINATION share/${PROJECT_NAME}/
+  OPTIONAL
+ )
+
 # Install our node and library
-install(TARGETS mono_node_cpp orb_slam3_lib
+install(TARGETS mono_node_cpp orb_slam3_lib DBoW2 g2o
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
