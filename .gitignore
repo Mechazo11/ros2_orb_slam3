@@ -2,5 +2,9 @@ README.md
 *.mp4
 .vscode/
 
+# ignore cmake build results in third party libs
+build/
+lib/
+
 # ignore colcon log files from build
 log/
