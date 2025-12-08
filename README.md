@@ -149,7 +149,16 @@ sudo apt install libopencv-dev=4.5.4+dfsg-9ubuntu4
 ```
 
 #### Compilation Considerations
-I would run into OOM issues, so I had to [extend the size of SWAP](https://www.forecr.io/blogs/programming/how-to-increase-swap-space-on-jetson-modules) on the Orin to 16gb. In addition, I limited the number of jobs to 4 to prevent crashing during compilation. These considerations are accounted for in this build command:
+The 3rd-party libraries in the default repository are precompiled for x86-64 processors, causing failure when the build attempts to link these libraries.
+
+To get around this, I've replaced the CMakeLists.txt files for the third-party repositories with the ones from the original ORBSLAM3 repository and modified its build.sh to only rebuild the third-party libraries. Ideally, this would not have to be run separately and could be handled by the overarching package CMake setup, but my CMake knowledge is limited and this works well enough for my use cases. Therefore, before building for the first time, run the build script to prepare the library .so files for use in the final compilation:
+
+```
+cd ~/ros2_ws/src/ros2_orb_slam3/orb_slam3
+./build_libs.sh
+```
+
+When compiling the package, I would run into OOM issues, so I had to [extend the size of SWAP](https://www.forecr.io/blogs/programming/how-to-increase-swap-space-on-jetson-modules) on the Orin to 16gb. In addition, I limited the number of jobs to 4 to prevent crashing during compilation. These considerations are accounted for in this build command:
 
 ```
 colcon build --symlink-install --packages-select ros2_orb_slam3 --parallel-workers 4 --cmake-args -DCMAKE_CXX_FLAGS="-w" # hide warning so we know what fails
