@@ -26,13 +26,13 @@ make -j
 
 cd ../../../
 
-echo "Uncompress vocabulary ..."
-
-cd Vocabulary
-tar -xf ORBvoc.txt.tar.gz
-cd ..
-
 # from original repo - we just want to rebuild the libs for the ros package
+# echo "Uncompress vocabulary ..."
+
+# cd Vocabulary
+# tar -xf ORBvoc.txt.tar.gz
+# cd ..
+
 # echo "Configuring and building ORB_SLAM3 ..."
 
 # mkdir build

@@ -120,18 +120,42 @@ python3 -c "import cv2; print(cv2.__version__)"
 
 ## 2. Installation
 
-Follow the steps below to create the ```ros2_test``` workspace, install dependencies and build the package. Note, the workspace must be named ```ros2_test``` due to a HARDCODED path in the python node. I leave it to the developers to change this behavior as they see fit.
+Follow the steps below to create the ```ros2_ws``` workspace, install dependencies and build the package. Note, the workspace must be named ```ros2_ws``` due to a HARDCODED path in the python node. I leave it to the developers to change this behavior as they see fit.
 
 ```bash
 cd ~
-mkdir -p ~/ros2_test/src
-cd ~/ros2_test/src
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/src
 git clone https://github.com/Mechazo11/ros2_orb_slam3.git
 cd .. # make sure you are in ~/ros2_ws root directory
 rosdep install -r --from-paths src --ignore-src -y --rosdistro humble
 source /opt/ros/humble/setup.bash
 colcon build --symlink-install
 ```
+
+### SBC Adjustments (Raspberry Pi, Jetson Orin Nano, etc)
+The default branch of this repositoriy does not successfully compile for arm-based single-board computers like the Jetson Orin Nano. The arm-support branch makes adjustments so that this project can compile successfully. These details are for the Jetson Orin Nano on the Jetpack 6.2 SDK, adjustments may be needed for other boards.
+
+#### Additional Packages
+During testing, compilation failed a few times due to additional missing dependencies. For a Jetson Orin Nano on Ubuntu 22.04, install the following packages:
+
+```
+sudo apt install libdc1394-dev libopenexr-dev
+```
+
+In addition, ROS2 will automatically install opencv 4.8.0 which conflicts with version 4.5.4 installed by the Nvidia Jetpack SDK. This will cause versioning issues when trying to use things like CV bridge. To fix this, hold the opencv package at version 4.5.4:
+```
+sudo apt install libopencv-dev=4.5.4+dfsg-9ubuntu4
+```
+
+#### Compilation Considerations
+I would run into OOM issues, so I had to [extend the size of SWAP](https://www.forecr.io/blogs/programming/how-to-increase-swap-space-on-jetson-modules) on the Orin to 16gb. In addition, I limited the number of jobs to 4 to prevent crashing during compilation. These considerations are accounted for in this build command:
+
+```
+colcon build --symlink-install --packages-select ros2_orb_slam3 --parallel-workers 4 --cmake-args -DCMAKE_CXX_FLAGS="-w" # hide warning so we know what fails
+```
+
+This will still take a while, so it's a good idea to run the process in a multiplexer like tmux or zellij so the process can be inspected later for issues. This build command also disables warnings so that errors are easier to find if the build fails, but it can be adjusted if necessary.
 
 ## 3. Monocular Example:
 
